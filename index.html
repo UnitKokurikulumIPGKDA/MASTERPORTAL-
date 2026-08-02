@@ -1,611 +1,248 @@
-<!DOCTYPE html>
-<html lang="ms">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal Pemarkahan Master Copy</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Google Fonts Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+/**
+ * STREAMING_CHUNK:Declaring helper function to extract Spreadsheet/Folder IDs...
+ * Membantu mengekstrak ID daripada Pautan (URL) penuh atau ID mentah.
+ * @param {string} input - Pautan URL atau ID
+ * @return {string} ID yang diekstrak
+ */
+function extractIdFromUrlOrId(input) {
+  if (!input) return "";
+  const str = input.toString().trim();
+  const sheetMatch = str.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  if (sheetMatch) return sheetMatch[1];
+  const folderMatch = str.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+  if (folderMatch) return folderMatch[1];
+  return str;
+}
 
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f8fafc;
-      color: #0f172a;
+const DEFAULT_CONFIG = {
+  COURSE_CODE: "",
+  COURSE_NAME: "",
+  DEPARTMENT: "",
+  SHEET_ID: "",
+  TARGET_FOLDER_ID: "",
+  IS_INITIALIZED: false,
+  SUPER_ADMIN_EMAILS: ["admin@ipg.edu.my"],
+  SUPER_ADMIN_PASSWORD: "Admin@MasterCopy",
+  TASKS: []
+};
+
+/**
+ * STREAMING_CHUNK:Retrieving active configuration from Script Properties...
+ * @return {Object} Konfigurasi aktif
+ */
+function getActiveConfig() {
+  const props = PropertiesService.getScriptProperties();
+  const saved = props.getProperty("MASTER_COURSE_CONFIG");
+  if (!saved) return DEFAULT_CONFIG;
+  try {
+    return JSON.parse(saved);
+  } catch(e) {
+    return DEFAULT_CONFIG;
+  }
+}
+
+/**
+ * STREAMING_CHUNK:Saving master configuration and setting up database headers...
+ * @param {Object} newConfig - Konfigurasi baharu dari UI
+ * @return {Object} Output maklum balas JSON
+ */
+function saveMasterConfig(newConfig) {
+  const lock = LockService.getScriptLock();
+  try { lock.waitLock(15000); } catch(e){}
+
+  try {
+    const courseCode = (newConfig.COURSE_CODE || "KURSUS_BARU").toString().trim().toUpperCase();
+    const courseName = (newConfig.COURSE_NAME || "Kursus Baru").toString().trim();
+
+    const rawSheetInput = newConfig.SHEET_LINK || newConfig.SHEET_ID;
+    const rawFolderInput = newConfig.FOLDER_LINK || newConfig.TARGET_FOLDER_ID;
+
+    const extractedSheetId = extractIdFromUrlOrId(rawSheetInput);
+    const extractedFolderId = extractIdFromUrlOrId(rawFolderInput);
+
+    if (!extractedSheetId) {
+      lock.releaseLock();
+      return createResponse({ status: "error", message: "Sila masukkan Pautan / ID Google Sheet yang sah!" });
     }
+
+    let ss, imageFolder;
+
+    try {
+      ss = SpreadsheetApp.openById(extractedSheetId);
+      newConfig.SHEET_ID = extractedSheetId;
+      newConfig.SHEET_URL = ss.getUrl();
+    } catch(e) {
+      lock.releaseLock();
+      return createResponse({ status: "error", message: "Gagal membuka Google Sheet! Pastikan pautan betul dan skrip mempunyai akses: " + e.toString() });
+    }
+
+    if (extractedFolderId) {
+      try {
+        imageFolder = DriveApp.getFolderById(extractedFolderId);
+        newConfig.TARGET_FOLDER_ID = extractedFolderId;
+        newConfig.MAIN_FOLDER_URL = imageFolder.getUrl();
+      } catch(e) {
+        console.warn("Folder ID tidak sah:", e);
+      }
+    }
+
+    newConfig.IS_INITIALIZED = true;
+    const props = PropertiesService.getScriptProperties();
+    props.setProperty("MASTER_COURSE_CONFIG", JSON.stringify(newConfig));
     
-    .glass-card {
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(226, 232, 240, 0.8);
-      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
-    }
-    
-    .gradient-header {
-      background: linear-gradient(135deg, #1e3a8a 0%, #1e1b4b 100%);
-    }
+    // Inisialisasi 6 helaian pangkalan data dengan header dinamik
+    setupCourseDatabase(newConfig);
 
-    .toast-container {
-      position: fixed;
-      bottom: 1.5rem;
-      right: 1.5rem;
-      z-index: 9999;
-    }
+    lock.releaseLock();
+    return createResponse({ 
+      status: "success", 
+      message: `Pangkalan Data untuk ${courseCode} (${courseName}) BERJAYA DIHUBUNGKAN & DIINISIALISASI PADA GOOGLE SHEET ANDA!`,
+      config: newConfig,
+      sheetUrl: newConfig.SHEET_URL,
+      folderUrl: newConfig.MAIN_FOLDER_URL || ""
+    });
+  } catch(err) {
+    lock.releaseLock();
+    return createResponse({ status: "error", message: "Gagal menyimpan & menyedia pangkalan data: " + err.toString() });
+  }
+}
 
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-  </style>
-</head>
-<body class="min-h-screen flex flex-col antialiased">
+const DATA_SHEET_NAME = "DATA_PELAJAR";
+const MARKAH_SHEET_NAME = "MARKAH_PELAJAR";
+const RUBRIK_SHEET_NAME = "RUBRIK_PENUH";
+const PEER_SHEET_NAME = "PEER_EVAL";
+const MODERATION_SAMPLES_SHEET = "SAMPEL_MODERASI";
+const LECTURER_SHEET_NAME = "DATA_PENSYARAH";
 
-  <header class="gradient-header text-white shadow-lg sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
-      <div class="flex items-center space-x-3">
-        <div class="p-2 bg-white/10 rounded-xl">
-          <i class="fa-solid fa-graduation-cap text-2xl text-amber-400"></i>
-        </div>
-        <div>
-          <h1 class="font-bold text-lg leading-tight tracking-wide" id="lblCourseTitle">MASTER PORTAL PEMARKAHAN</h1>
-          <p class="text-xs text-blue-200" id="lblCourseSubtitle">Sistem Pentaksiran Berterusan & Rubrik Akademik</p>
-        </div>
-      </div>
+/**
+ * STREAMING_CHUNK:Building dynamic database tabs and custom evaluator headers...
+ * @param {Object} cfg - Konfigurasi kursus
+ */
+function setupCourseDatabase(cfg) {
+  const config = cfg || getActiveConfig();
+  if (!config.SHEET_ID) return;
 
-      <div class="flex items-center space-x-3 text-xs">
-        <span class="bg-blue-900/60 text-blue-200 border border-blue-700/50 px-3 py-1.5 rounded-lg flex items-center gap-2" id="lblUserRole">
-          <i class="fa-solid fa-user-shield text-amber-400"></i>
-          <span id="txtUserName">Super Admin</span>
-        </span>
-        <button onclick="handleLogout()" class="bg-red-600/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition font-medium flex items-center gap-1.5 shadow-sm">
-          <i class="fa-solid fa-right-from-bracket"></i>
-          <span>Keluar</span>
-        </button>
-      </div>
-    </div>
+  let ss;
+  try {
+    ss = SpreadsheetApp.openById(config.SHEET_ID);
+  } catch(e) {
+    return;
+  }
 
-    <!-- NAVIGATION TABS -->
-    <div class="bg-blue-950/40 border-t border-white/10 px-4">
-      <div class="max-w-7xl mx-auto flex space-x-1 overflow-x-auto text-xs font-medium py-1" id="navTabs">
-        <button onclick="switchTab('setup')" id="tab-setup" class="px-4 py-2 rounded-lg text-amber-300 font-bold bg-white/10 flex items-center gap-2 transition whitespace-nowrap">
-          <i class="fa-solid fa-sliders text-amber-400"></i> Tetapan Master
-        </button>
-        <button onclick="switchTab('pemarkahan')" id="tab-pemarkahan" class="px-4 py-2 rounded-lg text-blue-200 hover:text-white hover:bg-white/5 flex items-center gap-2 transition whitespace-nowrap">
-          <i class="fa-solid fa-calculator"></i> Pemarkahan Induk
-        </button>
-        <button onclick="switchTab('rubrik')" id="tab-rubrik" class="px-4 py-2 rounded-lg text-blue-200 hover:text-white hover:bg-white/5 flex items-center gap-2 transition whitespace-nowrap">
-          <i class="fa-solid fa-list-check"></i> Panel Rubrik
-        </button>
-        <button onclick="switchTab('rekod')" id="tab-rekod" class="px-4 py-2 rounded-lg text-blue-200 hover:text-white hover:bg-white/5 flex items-center gap-2 transition whitespace-nowrap">
-          <i class="fa-solid fa-book"></i> Buku Rekod
-        </button>
-      </div>
-    </div>
-  </header>
+  // 1. DATA_PELAJAR
+  let dSheet = ss.getSheetByName(DATA_SHEET_NAME);
+  const dataHeaders = ["ID_SISTEM", "Nama_Pelajar", "JANTINA", "No_KP", "No_Giliran", "Kelas", "Penilai", "Link_Gambar", "Status_Upload"];
+  if (!dSheet) {
+    dSheet = ss.insertSheet(DATA_SHEET_NAME);
+    dSheet.appendRow(dataHeaders);
+    dSheet.getRange(1, 1, 1, dataHeaders.length).setBackground("#1e3a8a").setFontColor("white").setFontWeight("bold");
+    dSheet.setFrozenRows(1);
+  }
 
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
-    
-    <div id="mainLayoutGrid" class="block">
+  // 2. MARKAH_PELAJAR (Dynamic based on HPP level evaluatorMode)
+  let mSheet = ss.getSheetByName(MARKAH_SHEET_NAME);
+  if (!mSheet) mSheet = ss.insertSheet(MARKAH_SHEET_NAME);
+  mSheet.clear();
 
-      <!-- SIDEBAR: CALON (Hidden in setup mode) -->
-      <aside id="sidebarCandidateCard" class="hidden lg:col-span-4 glass-card rounded-2xl p-4 h-fit sticky top-24 mb-6">
-        <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-200">
-          <h2 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-            <i class="fa-solid fa-users text-blue-600"></i> Senarai Calon
-          </h2>
-        </div>
-        <div id="candidateList" class="space-y-2 max-h-[600px] overflow-y-auto">
-          <p class="text-xs text-slate-400 text-center py-4">Pangkalan data belum diinisialisasi.</p>
-        </div>
-      </aside>
-
-      <!-- MAIN DISPLAY AREA -->
-      <section id="mainDisplayArea" class="w-full space-y-6">
-
-        <!-- TAB 1: TETAPAN MASTER (FULL WIDTH CENTERED SETUP WIZARD) -->
-        <div id="ltab-setup" class="space-y-6 max-w-5xl mx-auto">
-          <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
-            
-            <div class="border-b border-slate-200 pb-4">
-              <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
-                <i class="fa-solid fa-sliders text-amber-500 text-2xl"></i>
-                Panel Tetapan Master (Setup Wizard)
-              </h2>
-              <p class="text-xs text-slate-500 mt-1">
-                Isikan Maklumat Kursus, Pautan Storan Google Sheets & Drive, serta Struktur HPP dan Kriteria Rubrik di bawah.
-              </p>
-            </div>
-
-            <!-- MAKLUMAT KURSUS -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-5 rounded-xl border border-slate-200/80">
-              <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Kod Kursus</label>
-                <input type="text" id="cfgCourseCode" placeholder="Cth: MPU3221" class="w-full text-xs p-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none uppercase font-bold text-slate-800">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Nama Kursus</label>
-                <input type="text" id="cfgCourseName" placeholder="Cth: Pengurusan Persatuan" class="w-full text-xs p-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none text-slate-800">
-              </div>
-              <div class="md:col-span-2">
-                <label class="block text-xs font-bold text-slate-700 mb-1">Jabatan / Unit</label>
-                <input type="text" id="cfgDepartment" placeholder="Cth: Unit Kokurikulum / IPGKDA" class="w-full text-xs p-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none text-slate-800">
-              </div>
-
-              <!-- PAUTAN GOOGLE SHEET & FOLDER DRIVE -->
-              <div class="md:col-span-2 border-t border-slate-200 pt-4 mt-2">
-                <label class="block text-xs font-extrabold text-blue-900 mb-1 flex items-center gap-1.5">
-                  <i class="fa-solid fa-file-excel text-emerald-600 text-sm"></i>
-                  Pautan / Link Google Sheet Pangkalan Data
-                </label>
-                <input type="text" id="cfgSheetLink" value="https://docs.google.com/spreadsheets/d/1BEVsG4Y73VZo28DX7KFG1ipCS1J0oD-lyOHhyWQwPSY/edit?usp=sharing" placeholder="Tampal Pautan Full Google Sheet anda di sini (https://docs.google.com/spreadsheets/d/...)" class="w-full text-xs p-3 bg-white border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono text-slate-800">
-              </div>
-              <div class="md:col-span-2">
-                <label class="block text-xs font-extrabold text-blue-900 mb-1 flex items-center gap-1.5">
-                  <i class="fa-solid fa-folder-open text-amber-600 text-sm"></i>
-                  Pautan / Link Folder Google Drive (Untuk Simpan Gambar Pelajar)
-                </label>
-                <input type="text" id="cfgFolderLink" placeholder="Tampal Pautan Full Folder Google Drive anda di sini (https://drive.google.com/drive/folders/...)" class="w-full text-xs p-3 bg-white border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono text-slate-800">
-              </div>
-            </div>
-
-            <!-- TUGASAN & RUBRIK BUILDER -->
-            <div class="space-y-4 border-t border-slate-200 pt-4">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                    <i class="fa-solid fa-cubes text-amber-600"></i>
-                    Struktur Tugasan, HPP & Sub-Kriteria Rubrik
-                  </h3>
-                  <p class="text-[11px] text-slate-500">Tetapkan Mod (Individu/Kumpulan) dan Penilai secara khusus mengikut setiap HPP.</p>
-                </div>
-                <button type="button" onclick="addNewTaskUI()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
-                  <i class="fa-solid fa-plus"></i> Tambah Tugasan
-                </button>
-              </div>
-
-              <!-- TASK CONTAINER -->
-              <div id="tasksUIContainer" class="space-y-6">
-                <!-- Dynamically populated by JS -->
-              </div>
-            </div>
-
-            <!-- BUTTON SIMPAN -->
-            <div class="mt-8 pt-6 border-t border-slate-200 flex justify-end">
-              <button type="button" onclick="saveMasterConfigFromUI()" class="w-full md:w-auto bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-extrabold text-sm px-8 py-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-floppy-disk text-base"></i>
-                <span>SIMPAN & INISIALISASI PANGKALAN DATA GOOGLE SHEETS</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 2: PEMARKAHAN INDUK -->
-        <div id="ltab-pemarkahan" class="hidden space-y-6">
-          <div class="glass-card rounded-2xl p-6">
-            <h2 class="text-lg font-bold text-slate-800 mb-4">Panel Pemarkahan Induk</h2>
-            <div id="pemarkahanContent" class="text-xs text-slate-500">
-              Sila pilih calon dari senarai untuk memasukkan markah.
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 3: PANEL RUBRIK -->
-        <div id="ltab-rubrik" class="hidden space-y-6">
-          <div class="glass-card rounded-2xl p-6">
-            <h2 class="text-lg font-bold text-slate-800 mb-4">Panel Penilaian Rubrik</h2>
-            <div id="rubrikContent" class="text-xs text-slate-500">
-              Pilih calon untuk mula penilaian rubrik secara terperinci.
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 4: BUKU REKOD -->
-        <div id="ltab-rekod" class="hidden space-y-6">
-          <div class="glass-card rounded-2xl p-6">
-            <h2 class="text-lg font-bold text-slate-800 mb-4">Buku Rekod Pemarkahan Kompleks</h2>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
-                    <th class="p-2.5">Bil</th>
-                    <th class="p-2.5">No. KP</th>
-                    <th class="p-2.5">Nama Pelajar</th>
-                    <th class="p-2.5">Kelas</th>
-                    <th class="p-2.5">Jumlah (100%)</th>
-                    <th class="p-2.5">Gred</th>
-                  </tr>
-                </thead>
-                <tbody id="tblBukuRekodBody" class="divide-y divide-slate-200">
-                  <tr>
-                    <td colspan="6" class="p-4 text-center text-slate-400">Pangkalan data belum diinisialisasi.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-      </section>
-    </div>
-  </main>
-
-  <div id="toastContainer" class="toast-container space-y-2"></div>
-
-  <script>
-    const API = "https://script.google.com/macros/s/AKfycbz5wnt58tbwg-wYQH_UUnkDY-nJJebQiw4D2O5oSx-aKZmwyKT8pGiVkz7acdNU8Liu/exec";
-
-    let activeConfig = null;
-    let currentUser = { email: "admin@ipg.edu.my", name: "Super Admin", isAdmin: true };
-
-    let setupConfig = {
-      COURSE_CODE: "MPU3221",
-      COURSE_NAME: "Pengurusan Persatuan",
-      DEPARTMENT: "Unit Kokurikulum / IPGKDA",
-      SHEET_LINK: "https://docs.google.com/spreadsheets/d/1BEVsG4Y73VZo28DX7KFG1ipCS1J0oD-lyOHhyWQwPSY/edit?usp=sharing",
-      FOLDER_LINK: "",
-      TASKS: [
-        {
-          id: "t1",
-          name: "Tugasan 1: Penulisan Esei / Artifak",
-          weight: 40.0,
-          hps: [
-            {
-              code: "hp1",
-              name: "HP1 — Pengetahuan & Artifak",
-              type: "INDIVIDU",
-              evaluatorMode: "SINGLE",
-              maxScore: 30.0,
-              color: "#4338ca",
-              rubrics: [
-                { code: "r1", name: "Pengenalan, Konsep & Rasional", penerangan: "Pengenalan dan konsep", max: 5.0 },
-                { code: "r2", name: "Logo, Moto & Kepentingan", penerangan: "Rekaan Logo dan Moto", max: 5.0 }
-              ]
-            }
-          ]
-        }
-      ]
-    };
-
-    window.onload = function() {
-      loadCourseConfig();
-    };
-
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      
-      let bgColor = 'bg-slate-900';
-      let icon = 'fa-circle-info';
-      
-      if (type === 'success') { bgColor = 'bg-emerald-800'; icon = 'fa-circle-check'; }
-      if (type === 'error') { bgColor = 'bg-rose-800'; icon = 'fa-triangle-exclamation'; }
-
-      toast.className = `${bgColor} text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-2 opacity-0 max-w-md`;
-      toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i><span>${message}</span>`;
-      
-      container.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.classList.remove('translate-y-2', 'opacity-0');
-      }, 50);
-
-      setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-2');
-        setTimeout(() => toast.remove(), 300);
-      }, 4500);
-    }
-
-    function loadCourseConfig() {
-      fetch(`${API}?action=getCourseConfig`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.status === "success" && data.config) {
-            activeConfig = data.config;
-            applyConfigToUI(activeConfig);
+  const markahHeaders = ["ID_SISTEM", "Nama_Pelajar", "JANTINA", "No_KP", "No_Giliran", "Kelas"];
+  
+  if (config.TASKS && Array.isArray(config.TASKS)) {
+    config.TASKS.forEach(t => {
+      if (t.hps && Array.isArray(t.hps)) {
+        t.hps.forEach(hp => {
+          const evalMode = hp.evaluatorMode || t.evaluatorMode || "SINGLE";
+          const hpCodeUpper = (hp.code || "HP").toUpperCase();
+          if (evalMode === "DUAL_AVG") {
+            markahHeaders.push(`${hpCodeUpper}_P1`, `${hpCodeUpper}_P2`, `${hpCodeUpper}_PURATA`);
           } else {
-            renderSetupWizard(setupConfig);
+            markahHeaders.push(`${hpCodeUpper}_${(hp.maxScore || 0).toFixed(1)}`);
           }
-        })
-        .catch(err => {
-          console.warn("Using fallback setup config:", err);
-          renderSetupWizard(setupConfig);
         });
-    }
-
-    function applyConfigToUI(cfg) {
-      if (cfg.COURSE_CODE) document.getElementById('lblCourseTitle').innerText = `${cfg.COURSE_CODE} — ${cfg.COURSE_NAME}`;
-      if (cfg.DEPARTMENT) document.getElementById('lblCourseSubtitle').innerText = cfg.DEPARTMENT;
-      
-      document.getElementById('cfgCourseCode').value = cfg.COURSE_CODE || "";
-      document.getElementById('cfgCourseName').value = cfg.COURSE_NAME || "";
-      document.getElementById('cfgDepartment').value = cfg.DEPARTMENT || "";
-      
-      if (document.getElementById('cfgSheetLink')) {
-        document.getElementById('cfgSheetLink').value = cfg.SHEET_LINK || cfg.SHEET_URL || cfg.SHEET_ID || "https://docs.google.com/spreadsheets/d/1BEVsG4Y73VZo28DX7KFG1ipCS1J0oD-lyOHhyWQwPSY/edit?usp=sharing";
       }
-      if (document.getElementById('cfgFolderLink')) {
-        document.getElementById('cfgFolderLink').value = cfg.FOLDER_LINK || cfg.MAIN_FOLDER_URL || cfg.TARGET_FOLDER_ID || "";
-      }
+    });
+  }
 
-      setupConfig = JSON.parse(JSON.stringify(cfg));
-      renderSetupWizard(setupConfig);
+  markahHeaders.push("JUMLAH_AKHIR_100", "GRED", "JUSTIFIKASI", "Penilai_1", "Penilai_2", "Tarikh_Masa");
 
-      const grid = document.getElementById('mainLayoutGrid');
-      const sidebar = document.getElementById('sidebarCandidateCard');
+  mSheet.appendRow(markahHeaders);
+  mSheet.getRange(1, 1, 1, markahHeaders.length).setBackground("#1e1b4b").setFontColor("white").setFontWeight("bold");
+  mSheet.setFrozenRows(1);
 
-      if (cfg.IS_INITIALIZED) {
-        sidebar.classList.remove('hidden');
-        grid.className = "grid grid-cols-1 lg:grid-cols-12 gap-6";
-        document.getElementById('mainDisplayArea').className = "lg:col-span-8 space-y-6";
-        switchTab('pemarkahan');
-      } else {
-        sidebar.classList.add('hidden');
-        grid.className = "block";
-        document.getElementById('mainDisplayArea').className = "w-full space-y-6";
-        switchTab('setup');
-      }
-    }
+  // 3. RUBRIK_PENUH
+  let rSheet = ss.getSheetByName(RUBRIK_SHEET_NAME);
+  if (!rSheet) rSheet = ss.insertSheet(RUBRIK_SHEET_NAME);
+  rSheet.clear();
 
-    function switchTab(tabName) {
-      ['setup', 'pemarkahan', 'rubrik', 'rekod'].forEach(t => {
-        const btn = document.getElementById(`tab-${t}`);
-        const sec = document.getElementById(`ltab-${t}`);
-        if (btn) btn.className = "px-4 py-2 rounded-lg text-blue-200 hover:text-white hover:bg-white/5 flex items-center gap-2 transition whitespace-nowrap text-xs font-medium";
-        if (sec) sec.classList.add('hidden');
-      });
-
-      const activeBtn = document.getElementById(`tab-${tabName}`);
-      const activeSec = document.getElementById(`ltab-${tabName}`);
-      
-      if (activeBtn) activeBtn.className = "px-4 py-2 rounded-lg text-amber-300 font-bold bg-white/10 flex items-center gap-2 transition whitespace-nowrap text-xs";
-      if (activeSec) activeSec.classList.remove('hidden');
-    }
-
-    function renderSetupWizard(cfg) {
-      const container = document.getElementById('tasksUIContainer');
-      container.innerHTML = '';
-
-      if (!cfg.TASKS || !Array.isArray(cfg.TASKS)) cfg.TASKS = [];
-
-      cfg.TASKS.forEach((task, tIdx) => {
-        const taskCard = document.createElement('div');
-        taskCard.className = "bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4";
-        
-        taskCard.innerHTML = `
-          <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-100/90 p-3.5 rounded-lg border border-slate-200">
-            <div class="flex items-center gap-2">
-              <span class="bg-amber-600 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg">Tugasan ${tIdx + 1}</span>
-              <input type="text" value="${task.name || ''}" onchange="updateTaskField(${tIdx}, 'name', this.value)" placeholder="Nama Tugasan (Esei/Amali/Kuiz)" class="text-xs font-bold text-slate-800 p-2 border border-slate-300 rounded-lg w-72 focus:ring-2 focus:ring-amber-500 focus:outline-none">
-            </div>
-
-            <div class="flex items-center gap-4 text-xs">
-              <label class="flex items-center gap-1.5 font-bold text-slate-700">
-                <span>Wajaran Tugasan (%):</span>
-                <input type="number" step="0.1" value="${task.weight || 0}" onchange="updateTaskField(${tIdx}, 'weight', parseFloat(this.value))" class="p-1.5 border border-slate-300 rounded-lg w-20 bg-white text-center font-bold">
-              </label>
-
-              <button type="button" onclick="removeTaskUI(${tIdx})" class="text-rose-600 hover:text-rose-800 p-1 text-sm">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </div>
-          </div>
-
-          <!-- HPP LIST -->
-          <div class="space-y-4 pl-3 border-l-2 border-amber-300 mt-2">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-800">Hasil Pembelajaran (HP/HPP) Bagi Tugasan Ini</span>
-              <button type="button" onclick="addHppUI(${tIdx})" class="text-xs text-amber-800 font-bold hover:underline flex items-center gap-1">
-                <i class="fa-solid fa-plus-circle"></i> Tambah HP
-              </button>
-            </div>
-
-            <div id="hppContainer-${tIdx}" class="space-y-4">
-              ${renderHppListUI(tIdx, task.hps || [])}
-            </div>
-          </div>
-        `;
-
-        container.appendChild(taskCard);
-      });
-    }
-
-    function renderHppListUI(tIdx, hps) {
-      return hps.map((hp, hIdx) => `
-        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-          <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
-            <div class="flex items-center gap-2">
-              <input type="text" value="${hp.code || ''}" onchange="updateHppField(${tIdx}, ${hIdx}, 'code', this.value)" placeholder="Kod HP (HP1)" class="text-xs font-bold text-blue-900 p-1.5 border border-slate-300 rounded w-20">
-              <input type="text" value="${hp.name || ''}" onchange="updateHppField(${tIdx}, ${hIdx}, 'name', this.value)" placeholder="Nama HP (cth: HP1 — Pengetahuan)" class="text-xs font-semibold text-slate-800 p-1.5 border border-slate-300 rounded w-64">
-            </div>
-
-            <!-- PER-HPP MODE AND EVALUATOR SELECTION -->
-            <div class="flex flex-wrap items-center gap-3 text-xs">
-              <label class="flex items-center gap-1 font-bold text-slate-700">
-                <span>Mod HP:</span>
-                <select onchange="updateHppField(${tIdx}, ${hIdx}, 'type', this.value)" class="p-1.5 border border-slate-300 rounded-lg bg-white font-semibold">
-                  <option value="INDIVIDU" ${(hp.type || 'INDIVIDU') === 'INDIVIDU' ? 'selected' : ''}>INDIVIDU</option>
-                  <option value="KUMPULAN" ${(hp.type || 'INDIVIDU') === 'KUMPULAN' ? 'selected' : ''}>KUMPULAN</option>
-                </select>
-              </label>
-
-              <label class="flex items-center gap-1 font-bold text-slate-700">
-                <span>Penilai HP:</span>
-                <select onchange="updateHppField(${tIdx}, ${hIdx}, 'evaluatorMode', this.value)" class="p-1.5 border border-slate-300 rounded-lg bg-white font-semibold">
-                  <option value="SINGLE" ${(hp.evaluatorMode || 'SINGLE') === 'SINGLE' ? 'selected' : ''}>Penilai Tunggal (SINGLE)</option>
-                  <option value="DUAL_AVG" ${(hp.evaluatorMode || 'SINGLE') === 'DUAL_AVG' ? 'selected' : ''}>Dwi-Penilai Purata (DUAL_AVG)</option>
-                </select>
-              </label>
-
-              <div class="flex items-center gap-1">
-                <span class="text-slate-600 font-semibold">Max Score:</span>
-                <input type="number" step="0.1" value="${hp.maxScore || 0}" onchange="updateHppField(${tIdx}, ${hIdx}, 'maxScore', parseFloat(this.value))" class="text-xs font-bold p-1 border border-slate-300 rounded w-16 text-center">
-              </div>
-
-              <button type="button" onclick="removeHppUI(${tIdx}, ${hIdx})" class="text-rose-500 hover:text-rose-700 p-1">
-                <i class="fa-solid fa-xmark text-sm"></i>
-              </button>
-            </div>
-          </div>
-
-          <!-- RUBRIC CRITERIA LIST -->
-          <div class="space-y-2 pl-3 border-l-2 border-blue-300">
-            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
-              <span>Sub-Kriteria Penilaian Rubrik Bagi HP Ini (Sehingga 10+)</span>
-              <button type="button" onclick="addRubricCriterionUI(${tIdx}, ${hIdx})" class="text-blue-700 hover:underline flex items-center gap-1">
-                <i class="fa-solid fa-plus text-[10px]"></i> Tambah Kriteria
-              </button>
-            </div>
-            <div class="space-y-1.5">
-              ${(hp.rubrics || []).map((rub, rIdx) => `
-                <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200">
-                  <input type="text" value="${rub.code || ''}" onchange="updateRubricField(${tIdx}, ${hIdx}, ${rIdx}, 'code', this.value)" placeholder="Kod" class="text-xs p-1.5 border rounded w-14 font-semibold">
-                  <input type="text" value="${rub.name || ''}" onchange="updateRubricField(${tIdx}, ${hIdx}, ${rIdx}, 'name', this.value)" placeholder="Tajuk Sub-Kriteria Penilaian" class="text-xs p-1.5 border rounded flex-1">
-                  <input type="number" step="0.1" value="${rub.max || 0}" onchange="updateRubricField(${tIdx}, ${hIdx}, ${rIdx}, 'max', parseFloat(this.value))" placeholder="Max" class="text-xs p-1.5 border rounded w-16 text-center font-bold">
-                  <button type="button" onclick="removeRubricCriterionUI(${tIdx}, ${hIdx}, ${rIdx})" class="text-rose-400 hover:text-rose-600 p-1">
-                    <i class="fa-solid fa-minus-circle"></i>
-                  </button>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function addNewTaskUI() {
-      setupConfig.TASKS.push({
-        id: "t" + (setupConfig.TASKS.length + 1),
-        name: "Tugasan " + (setupConfig.TASKS.length + 1),
-        weight: 20.0,
-        hps: [
-          {
-            code: "hp1",
-            name: "HP Baru",
-            type: "INDIVIDU",
-            evaluatorMode: "SINGLE",
-            maxScore: 20.0,
-            rubrics: []
+  const rubrikHeaders = ["Tarikh_Masa", "No_KP", "Nama_Pelajar", "Kelas"];
+  if (config.TASKS && Array.isArray(config.TASKS)) {
+    config.TASKS.forEach(t => {
+      if (t.hps && Array.isArray(t.hps)) {
+        t.hps.forEach(hp => {
+          if (hp.rubrics && Array.isArray(hp.rubrics)) {
+            hp.rubrics.forEach(rub => rubrikHeaders.push((rub.code || "R").toUpperCase()));
           }
-        ]
-      });
-      renderSetupWizard(setupConfig);
-    }
-
-    function removeTaskUI(tIdx) {
-      setupConfig.TASKS.splice(tIdx, 1);
-      renderSetupWizard(setupConfig);
-    }
-
-    function updateTaskField(tIdx, key, val) {
-      setupConfig.TASKS[tIdx][key] = val;
-    }
-
-    function addHppUI(tIdx) {
-      setupConfig.TASKS[tIdx].hps.push({
-        code: "hp" + (setupConfig.TASKS[tIdx].hps.length + 1),
-        name: "HP Baru",
-        type: "INDIVIDU",
-        evaluatorMode: "SINGLE",
-        maxScore: 20.0,
-        color: "#1e3a8a",
-        rubrics: []
-      });
-      renderSetupWizard(setupConfig);
-    }
-
-    function removeHppUI(tIdx, hIdx) {
-      setupConfig.TASKS[tIdx].hps.splice(hIdx, 1);
-      renderSetupWizard(setupConfig);
-    }
-
-    function updateHppField(tIdx, hIdx, key, val) {
-      setupConfig.TASKS[tIdx].hps[hIdx][key] = val;
-    }
-
-    function addRubricCriterionUI(tIdx, hIdx) {
-      setupConfig.TASKS[tIdx].hps[hIdx].rubrics.push({
-        code: "r" + (setupConfig.TASKS[tIdx].hps[hIdx].rubrics.length + 1),
-        name: "Kriteria Penilaian Baru",
-        penerangan: "",
-        max: 5.0
-      });
-      renderSetupWizard(setupConfig);
-    }
-
-    function removeRubricCriterionUI(tIdx, hIdx, rIdx) {
-      setupConfig.TASKS[tIdx].hps[hIdx].rubrics.splice(rIdx, 1);
-      renderSetupWizard(setupConfig);
-    }
-
-    function updateRubricField(tIdx, hIdx, rIdx, key, val) {
-      setupConfig.TASKS[tIdx].hps[hIdx].rubrics[rIdx][key] = val;
-    }
-
-    function saveMasterConfigFromUI() {
-      setupConfig.COURSE_CODE = document.getElementById('cfgCourseCode').value.trim().toUpperCase();
-      setupConfig.COURSE_NAME = document.getElementById('cfgCourseName').value.trim();
-      setupConfig.DEPARTMENT = document.getElementById('cfgDepartment').value.trim();
-      setupConfig.SHEET_LINK = document.getElementById('cfgSheetLink').value.trim();
-      setupConfig.FOLDER_LINK = document.getElementById('cfgFolderLink').value.trim();
-
-      if (!setupConfig.COURSE_CODE || !setupConfig.COURSE_NAME) {
-        showToast("Sila isikan Kod Kursus dan Nama Kursus!", "error");
-        return;
+          rubrikHeaders.push(`JUM_${(hp.code || "HP").toUpperCase()}`);
+        });
       }
+    });
+  }
+  rubrikHeaders.push("Penilai", "Peranan_Penilai", "Status");
 
-      if (!setupConfig.SHEET_LINK) {
-        showToast("Sila masukkan Pautan / Link Google Sheet anda!", "error");
-        return;
-      }
+  rSheet.appendRow(rubrikHeaders);
+  rSheet.getRange(1, 1, 1, rubrikHeaders.length).setBackground("#0f172a").setFontColor("white").setFontWeight("bold");
+  rSheet.setFrozenRows(1);
 
-      showToast("Menyambung & menginisialisasi Google Sheet anda...", "info");
+  // 4. PEER_EVAL
+  let pSheet = ss.getSheetByName(PEER_SHEET_NAME);
+  if (!pSheet) {
+    pSheet = ss.insertSheet(PEER_SHEET_NAME);
+    pSheet.appendRow(["ID", "Tarikh_Masa", "Evaluator_KP", "Evaluator_Nama", "Evaluator_Kelas", "Target_KP", "Target_Nama", "Target_Kelas", "Q1_Kepimpinan", "Q2_Autonomi", "Q3_Tanggungjawab", "Q4_Penganjuran", "Q5_Kerjasama", "Avg_Score", "Catatan"]);
+    pSheet.getRange(1, 1, 1, 15).setBackground("#0284c7").setFontColor("white").setFontWeight("bold");
+    pSheet.setFrozenRows(1);
+  }
 
-      fetch(API, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-          action: "saveMasterConfig",
-          config: setupConfig
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === "success") {
-          showToast(data.message, "success");
-          activeConfig = data.config;
-          applyConfigToUI(activeConfig);
-        } else {
-          showToast("Gagal menyelenggara: " + data.message, "error");
-        }
-      })
-      .catch(err => {
-        showToast("Ralat sambungan: " + err.toString(), "error");
-      });
-    }
+  // 5. SAMPEL_MODERASI
+  let modSheet = ss.getSheetByName(MODERATION_SAMPLES_SHEET);
+  if (!modSheet) {
+    modSheet = ss.insertSheet(MODERATION_SAMPLES_SHEET);
+    modSheet.appendRow(["Task", "KelasFilter", "Bil", "KP", "Nama", "Kelas", "Markah", "MarkahPct", "MaxPossible", "Gred", "Penilai", "Kelompok", "TarikhKunci", "KunciOleh"]);
+    modSheet.getRange(1, 1, 1, 14).setBackground("#b45309").setFontColor("white").setFontWeight("bold");
+    modSheet.setFrozenRows(1);
+  }
 
-    function handleLogout() {
-      showToast("Sesi log masuk ditamatkan.", "info");
-    }
-  </script>
-</body>
-</html>
+  // 6. DATA_PENSYARAH
+  let lSheet = ss.getSheetByName(LECTURER_SHEET_NAME);
+  if (!lSheet) {
+    lSheet = ss.insertSheet(LECTURER_SHEET_NAME);
+    lSheet.appendRow(["Email", "Nama", "Password", "Tarikh"]);
+    lSheet.getRange(1, 1, 1, 4).setBackground("#0284c7").setFontColor("white").setFontWeight("bold");
+    lSheet.setFrozenRows(1);
+  }
+}
+
+/**
+ * STREAMING_CHUNK:Creating JSON response output...
+ */
+function createResponse(p) {
+  return ContentService.createTextOutput(JSON.stringify(p)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  try {
+    const a = e ? e.parameter.action : "";
+    if (a === "getCourseConfig") return createResponse({ status: "success", config: getActiveConfig() });
+    return createResponse({ status: "success", config: getActiveConfig() });
+  } catch(err) {
+    return createResponse({ status: "error", message: err.toString() });
+  }
+}
+
+function doPost(e) {
+  try {
+    const p = JSON.parse(e.postData.contents);
+    if (p.action === "saveMasterConfig") return saveMasterConfig(p.config);
+    return createResponse({ status: "error", message: "Aksi POST tidak dikenali" });
+  } catch(err) {
+    return createResponse({ status: "error", message: err.toString() });
+  }
+}
