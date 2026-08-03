@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Master Portal Pemarkahan IPG (Kemas Kini Ogos 2026)</title>
-  
-  <!-- Tailwind CSS & FontAwesome Icons -->
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -76,7 +75,7 @@
                 <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Setup Wizard IPG Ogos 2026
               </span>
               <h2 class="text-2xl font-extrabold mt-2 text-white">Panel Tetapan Master Portal</h2>
-              <p class="text-xs text-indigo-200 mt-1">Satu portal disediakan bagi setiap kursus. Masukkan maklumat kursus, pautan Google Drive/Sheet, serta struktur HPP dan Rubrik anda.</p>
+              <p class="text-xs text-indigo-200 mt-1">Satu portal disediakan bagi setiap kursus. Masukkan maklumat kursus, pautan Google Drive/Sheet, serta struktur HPP dan Rubrik anda dari tapak bersih.</p>
             </div>
             <div class="hidden sm:block text-5xl text-amber-400/20">
               <i class="fa-solid fa-gears"></i>
@@ -239,7 +238,7 @@
       document.getElementById('lblCourseTitle').innerText = "MASTER PORTAL IPG (BELUM DIINISIALISASI)";
       document.getElementById('lblDeptTitle').innerText = "Sila atur tetapan master di bawah mengikut Buku Panduan Pentaksiran IPG Ogos 2026";
       
-      // Jika tiada tugasan, sediakan 1 tugasan kosong bersedia untuk diisi
+      // Jika tiada tugasan, sediakan 1 tugasan bersih
       if (!COURSE_CONFIG.TASKS || COURSE_CONFIG.TASKS.length === 0) {
         COURSE_CONFIG.TASKS = [
           {
@@ -256,7 +255,7 @@
                 evaluatorMode: "SINGLE",
                 rubricLevel: "5_TAHAP",
                 rubrics: [
-                  { id: `r_${Date.now()}`, code: "R1", title: "", desc: "", max: 0 }
+                  { id: `r_${Date.now()}`, code: "", title: "", desc: "", max: 0 }
                 ]
               }
             ]
@@ -323,12 +322,15 @@
               });
             }
 
+            // Dapatkan lencana HP secara dinamik berdasarkan input pengguna
+            const dynamicHpBadge = (hp.code && hp.code.trim() !== "") ? hp.code.toUpperCase().trim() : `HP ${hpIndex+1}`;
+
             hpsHTML += `
               <div class="bg-indigo-50/40 p-4 rounded-xl border border-indigo-100 space-y-3">
                 <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-lg border border-indigo-100">
                   <div class="flex items-center gap-2 flex-1 min-w-[220px]">
-                    <span class="text-xs font-black text-indigo-950 bg-indigo-100 px-2.5 py-1 rounded">HPP ${hpIndex+1}</span>
-                    <input type="text" value="${hp.code || ''}" placeholder="Kod (cth: HPP1)" onchange="updateHPField(${tIndex}, ${hpIndex}, 'code', this.value)" class="w-24 p-1.5 text-xs font-bold border rounded uppercase text-center">
+                    <span class="text-xs font-black text-indigo-950 bg-indigo-100 px-2.5 py-1 rounded" id="badge_hp_${tIndex}_${hpIndex}">${dynamicHpBadge}</span>
+                    <input type="text" value="${hp.code || ''}" placeholder="Kod (cth: HP3 / HPP2)" oninput="updateHPBadgeLive(${tIndex}, ${hpIndex}, this.value)" onchange="updateHPField(${tIndex}, ${hpIndex}, 'code', this.value)" class="w-28 p-1.5 text-xs font-bold border rounded uppercase text-center">
                     <input type="text" value="${hp.title || ''}" placeholder="Tajuk Hasil Pembelajaran / HPP" onchange="updateHPField(${tIndex}, ${hpIndex}, 'title', this.value)" class="flex-1 p-1.5 text-xs border rounded font-medium">
                   </div>
 
@@ -397,10 +399,15 @@
       });
     }
 
-    // Helper State Operations
+    function updateHPBadgeLive(tIdx, hpIdx, val) {
+      const badge = document.getElementById(`badge_hp_${tIdx}_${hpIdx}`);
+      if (badge) {
+        badge.innerText = (val && val.trim() !== "") ? val.toUpperCase().trim() : `HP ${hpIdx+1}`;
+      }
+    }
+
     function addNewTaskUI() {
       if (!COURSE_CONFIG.TASKS) COURSE_CONFIG.TASKS = [];
-      const newTIndex = COURSE_CONFIG.TASKS.length + 1;
       COURSE_CONFIG.TASKS.push({
         id: `t_${Date.now()}`,
         title: "",
@@ -414,7 +421,7 @@
             mode: "INDIVIDU",
             evaluatorMode: "SINGLE",
             rubricLevel: "5_TAHAP",
-            rubrics: [{ id: `r_${Date.now()}`, code: "R1", title: "", desc: "", max: 0 }]
+            rubrics: [{ id: `r_${Date.now()}`, code: "", title: "", desc: "", max: 0 }]
           }
         ]
       });
@@ -432,7 +439,6 @@
     }
 
     function addHP(tIdx) {
-      const hpCount = COURSE_CONFIG.TASKS[tIdx].hps.length + 1;
       COURSE_CONFIG.TASKS[tIdx].hps.push({
         id: `hp_${Date.now()}`,
         code: "",
@@ -441,7 +447,7 @@
         mode: "INDIVIDU",
         evaluatorMode: "SINGLE",
         rubricLevel: "5_TAHAP",
-        rubrics: [{ id: `r_${Date.now()}`, code: `R${hpCount}`, title: "", desc: "", max: 0 }]
+        rubrics: [{ id: `r_${Date.now()}`, code: "", title: "", desc: "", max: 0 }]
       });
       renderTasksUI();
     }
@@ -457,10 +463,9 @@
     }
 
     function addRubric(tIdx, hpIdx) {
-      const rCount = COURSE_CONFIG.TASKS[tIdx].hps[hpIdx].rubrics.length + 1;
       COURSE_CONFIG.TASKS[tIdx].hps[hpIdx].rubrics.push({
         id: `r_${Date.now()}`,
-        code: `R${rCount}`,
+        code: "",
         title: "",
         desc: "",
         max: 0
