@@ -76,7 +76,7 @@
                 <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Setup Wizard IPG Ogos 2026
               </span>
               <h2 class="text-2xl font-extrabold mt-2 text-white">Panel Tetapan Master Portal</h2>
-              <p class="text-xs text-indigo-200 mt-1">Satu portal disediakan bagi setiap kursus. Masukkan maklumat kursus, pautan Google Drive/Sheet, serta struktur HPP dan Rubrik.</p>
+              <p class="text-xs text-indigo-200 mt-1">Satu portal disediakan bagi setiap kursus. Masukkan maklumat kursus, pautan Google Drive/Sheet, serta struktur HPP dan Rubrik anda.</p>
             </div>
             <div class="hidden sm:block text-5xl text-amber-400/20">
               <i class="fa-solid fa-gears"></i>
@@ -102,11 +102,11 @@
               </div>
               <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Jabatan / Unit *</label>
-                <input type="text" id="cfgDept" required value="Unit Kokurikulum IPGKDA" class="w-full text-xs font-semibold p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500">
+                <input type="text" id="cfgDept" required placeholder="cth: Unit Kokurikulum IPGKDA" class="w-full text-xs font-semibold p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500">
               </div>
               <div class="md:col-span-2">
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Sesi Akademik & Ambilan *</label>
-                <input type="text" id="cfgAcademicSession" required value="2026/2027 (Kemas Kini Ogos 2026)" class="w-full text-xs font-semibold p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500">
+                <input type="text" id="cfgAcademicSession" required placeholder="cth: 2026/2027 (Ambilan Jun 2026)" class="w-full text-xs font-semibold p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500">
               </div>
             </div>
           </div>
@@ -143,7 +143,7 @@
                 <h3 class="text-sm font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-2">
                   <i class="fa-solid fa-layer-group text-purple-600"></i> C. Pembina Tugasan, HPP & Kriteria Rubrik
                 </h3>
-                <p class="text-xs text-slate-500 mt-1">Tetapkan Mod Penilai (SINGLE / DUAL_AVG) dan Mod Tugasan (INDIVIDU / KUMPULAN) pada setiap HPP.</p>
+                <p class="text-xs text-slate-500 mt-1">Bina tugasan, tetapkan HPP, serta masukkan kriteria rubrik anda dari tapak bersih (kosong).</p>
               </div>
               <button type="button" onclick="addNewTaskUI()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow flex items-center gap-1">
                 <i class="fa-solid fa-plus"></i> Tambah Tugasan
@@ -199,12 +199,12 @@
     // Pautan API Pelayan Apps Script Utama
     const API = "https://script.google.com/macros/s/AKfycbz5wnt58tbwg-wYQH_UUnkDY-nJJebQiw4D2O5oSx-aKZmwyKT8pGiVkz7acdNU8Liu/exec";
 
-    // Konfigurasi Dynamic Kursus State
+    // Konfigurasi Dynamic Kursus State (Bermula Kosong)
     let COURSE_CONFIG = {
       COURSE_CODE: "",
       COURSE_NAME: "",
-      DEPARTMENT: "Unit Kokurikulum IPGKDA",
-      ACADEMIC_SESSION: "2026/2027",
+      DEPARTMENT: "",
+      ACADEMIC_SESSION: "",
       SHEET_LINK: "https://docs.google.com/spreadsheets/d/1BEVsG4Y73VZo28DX7KFG1ipCS1J0oD-lyOHhyWQwPSY/edit",
       FOLDER_LINK: "",
       TASKS: []
@@ -239,25 +239,24 @@
       document.getElementById('lblCourseTitle').innerText = "MASTER PORTAL IPG (BELUM DIINISIALISASI)";
       document.getElementById('lblDeptTitle').innerText = "Sila atur tetapan master di bawah mengikut Buku Panduan Pentaksiran IPG Ogos 2026";
       
+      // Jika tiada tugasan, sediakan 1 tugasan kosong bersedia untuk diisi
       if (!COURSE_CONFIG.TASKS || COURSE_CONFIG.TASKS.length === 0) {
         COURSE_CONFIG.TASKS = [
           {
-            id: "t1",
-            title: "Tugasan 1: Penulisan Akademik",
-            weight: 40,
+            id: `t_${Date.now()}`,
+            title: "",
+            weight: 0,
             hps: [
               {
-                id: "hp1",
-                code: "HP1",
-                title: "Analisis & Pengetahuan",
-                maxScore: 30,
+                id: `hp_${Date.now()}`,
+                code: "",
+                title: "",
+                maxScore: 0,
                 mode: "INDIVIDU",
                 evaluatorMode: "SINGLE",
                 rubricLevel: "5_TAHAP",
-                tags: ["6C_Critical", "VBE_Integriti"],
                 rubrics: [
-                  { id: "r1", code: "R1", title: "Kejelasan Isu", desc: "Ulasan kritikal", max: 15 },
-                  { id: "r2", code: "R2", title: "Pengolahan Idea", desc: "Struktur perenggan", max: 15 }
+                  { id: `r_${Date.now()}`, code: "R1", title: "", desc: "", max: 0 }
                 ]
               }
             ]
@@ -268,8 +267,8 @@
     }
 
     function renderUIInitializedState() {
-      document.getElementById('lblCourseTitle').innerText = `${COURSE_CONFIG.COURSE_CODE} — ${COURSE_CONFIG.COURSE_NAME}`;
-      document.getElementById('lblDeptTitle').innerText = `${COURSE_CONFIG.DEPARTMENT} | Sesi ${COURSE_CONFIG.ACADEMIC_SESSION || '2026/2027'}`;
+      document.getElementById('lblCourseTitle').innerText = `${COURSE_CONFIG.COURSE_CODE || 'KURSUS'} — ${COURSE_CONFIG.COURSE_NAME || 'NAMA KURSUS'}`;
+      document.getElementById('lblDeptTitle').innerText = `${COURSE_CONFIG.DEPARTMENT || 'JABATAN'} | Sesi ${COURSE_CONFIG.ACADEMIC_SESSION || '2026/2027'}`;
 
       document.getElementById('cfgCourseCode').value = COURSE_CONFIG.COURSE_CODE || "";
       document.getElementById('cfgCourseName').value = COURSE_CONFIG.COURSE_NAME || "";
@@ -316,7 +315,7 @@
                     <input type="text" value="${rub.desc || ''}" placeholder="Penerangan / Deskriptor Ringkas" onchange="updateRubricField(${tIndex}, ${hpIndex}, ${rIndex}, 'desc', this.value)" class="flex-1 min-w-[180px] p-1.5 border rounded focus:ring-1 focus:ring-amber-500">
                     <div class="flex items-center gap-1 w-28">
                       <span class="text-[10px] text-slate-400 font-bold">Max:</span>
-                      <input type="number" step="0.1" value="${rub.max || 10}" onchange="updateRubricField(${tIndex}, ${hpIndex}, ${rIndex}, 'max', this.value)" class="w-full p-1.5 border rounded font-bold text-center">
+                      <input type="number" step="0.1" value="${rub.max || ''}" placeholder="0" onchange="updateRubricField(${tIndex}, ${hpIndex}, ${rIndex}, 'max', this.value)" class="w-full p-1.5 border rounded font-bold text-center">
                     </div>
                     <button type="button" onclick="removeRubric(${tIndex}, ${hpIndex}, ${rIndex})" class="text-rose-500 hover:text-rose-700 p-1.5"><i class="fa-solid fa-xmark"></i></button>
                   </div>
@@ -329,8 +328,8 @@
                 <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-lg border border-indigo-100">
                   <div class="flex items-center gap-2 flex-1 min-w-[220px]">
                     <span class="text-xs font-black text-indigo-950 bg-indigo-100 px-2.5 py-1 rounded">HPP ${hpIndex+1}</span>
-                    <input type="text" value="${hp.code || 'HP'+(hpIndex+1)}" placeholder="Kod (HP1)" onchange="updateHPField(${tIndex}, ${hpIndex}, 'code', this.value)" class="w-20 p-1.5 text-xs font-bold border rounded uppercase text-center">
-                    <input type="text" value="${hp.title || ''}" placeholder="Tajuk Hasil Pembelajaran" onchange="updateHPField(${tIndex}, ${hpIndex}, 'title', this.value)" class="flex-1 p-1.5 text-xs border rounded font-medium">
+                    <input type="text" value="${hp.code || ''}" placeholder="Kod (cth: HPP1)" onchange="updateHPField(${tIndex}, ${hpIndex}, 'code', this.value)" class="w-24 p-1.5 text-xs font-bold border rounded uppercase text-center">
+                    <input type="text" value="${hp.title || ''}" placeholder="Tajuk Hasil Pembelajaran / HPP" onchange="updateHPField(${tIndex}, ${hpIndex}, 'title', this.value)" class="flex-1 p-1.5 text-xs border rounded font-medium">
                   </div>
 
                   <div class="flex flex-wrap items-center gap-2">
@@ -352,7 +351,7 @@
 
                     <div class="flex items-center gap-1 w-28">
                       <span class="text-[10px] font-bold text-slate-500">Max Score:</span>
-                      <input type="number" step="0.1" value="${hp.maxScore || 30}" onchange="updateHPField(${tIndex}, ${hpIndex}, 'maxScore', this.value)" class="w-full p-1.5 text-xs font-bold border rounded text-center">
+                      <input type="number" step="0.1" value="${hp.maxScore || ''}" placeholder="0" onchange="updateHPField(${tIndex}, ${hpIndex}, 'maxScore', this.value)" class="w-full p-1.5 text-xs font-bold border rounded text-center">
                     </div>
 
                     <button type="button" onclick="removeHP(${tIndex}, ${hpIndex})" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-trash-can"></i></button>
@@ -362,7 +361,7 @@
                 <!-- Sub-Rubrics Section -->
                 <div class="pl-2 space-y-2">
                   <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider"><i class="fa-solid fa-list-check mr-1"></i> Sub-Kriteria Rubrik (Sehingga 10+ Item)</span>
+                    <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider"><i class="fa-solid fa-list-check mr-1"></i> Sub-Kriteria Rubrik</span>
                     <button type="button" onclick="addRubric(${tIndex}, ${hpIndex})" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800"><i class="fa-solid fa-plus mr-1"></i> Tambah Kriteria</button>
                   </div>
                   <div class="space-y-2">${rubricsHTML}</div>
@@ -376,13 +375,13 @@
           <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
             <div class="flex items-center gap-2 flex-1 min-w-[240px]">
               <span class="w-8 h-8 rounded-lg bg-amber-500 text-indigo-950 font-black flex items-center justify-center text-xs">${tIndex+1}</span>
-              <input type="text" value="${task.title || ''}" placeholder="Tajuk Tugasan (cth: Penulisan Esei / Pembentangan Amali / Kuiz)" onchange="updateTaskField(${tIndex}, 'title', this.value)" class="flex-1 p-2 text-xs font-bold border rounded-lg focus:ring-2 focus:ring-amber-500">
+              <input type="text" value="${task.title || ''}" placeholder="Tajuk Tugasan (cth: Tugasan 1: Penulisan / Amali)" onchange="updateTaskField(${tIndex}, 'title', this.value)" class="flex-1 p-2 text-xs font-bold border rounded-lg focus:ring-2 focus:ring-amber-500">
             </div>
 
             <div class="flex items-center gap-3">
               <div class="flex items-center gap-1 bg-slate-100 px-3 py-1.5 rounded-lg border">
                 <span class="text-xs font-bold text-slate-600">Wajaran:</span>
-                <input type="number" step="1" value="${task.weight || 20}" onchange="updateTaskField(${tIndex}, 'weight', this.value)" class="w-14 p-1 text-xs font-black text-center bg-white border rounded">
+                <input type="number" step="1" value="${task.weight || ''}" placeholder="0" onchange="updateTaskField(${tIndex}, 'weight', this.value)" class="w-14 p-1 text-xs font-black text-center bg-white border rounded">
                 <span class="text-xs font-bold text-slate-600">%</span>
               </div>
 
@@ -403,19 +402,19 @@
       if (!COURSE_CONFIG.TASKS) COURSE_CONFIG.TASKS = [];
       const newTIndex = COURSE_CONFIG.TASKS.length + 1;
       COURSE_CONFIG.TASKS.push({
-        id: `t${Date.now()}`,
-        title: `Tugasan ${newTIndex}`,
-        weight: 20,
+        id: `t_${Date.now()}`,
+        title: "",
+        weight: 0,
         hps: [
           {
             id: `hp_${Date.now()}`,
-            code: `HP${newTIndex}`,
-            title: `Hasil Pembelajaran ${newTIndex}`,
-            maxScore: 20,
+            code: "",
+            title: "",
+            maxScore: 0,
             mode: "INDIVIDU",
             evaluatorMode: "SINGLE",
             rubricLevel: "5_TAHAP",
-            rubrics: [{ id: `r_${Date.now()}`, code: "R1", title: "Kriteria 1", desc: "Deskripsi", max: 10 }]
+            rubrics: [{ id: `r_${Date.now()}`, code: "R1", title: "", desc: "", max: 0 }]
           }
         ]
       });
@@ -436,13 +435,13 @@
       const hpCount = COURSE_CONFIG.TASKS[tIdx].hps.length + 1;
       COURSE_CONFIG.TASKS[tIdx].hps.push({
         id: `hp_${Date.now()}`,
-        code: `HP${hpCount}`,
-        title: `Hasil Pembelajaran Baru`,
-        maxScore: 20,
+        code: "",
+        title: "",
+        maxScore: 0,
         mode: "INDIVIDU",
         evaluatorMode: "SINGLE",
         rubricLevel: "5_TAHAP",
-        rubrics: [{ id: `r_${Date.now()}`, code: "R1", title: "Kriteria 1", desc: "", max: 10 }]
+        rubrics: [{ id: `r_${Date.now()}`, code: `R${hpCount}`, title: "", desc: "", max: 0 }]
       });
       renderTasksUI();
     }
@@ -462,9 +461,9 @@
       COURSE_CONFIG.TASKS[tIdx].hps[hpIdx].rubrics.push({
         id: `r_${Date.now()}`,
         code: `R${rCount}`,
-        title: `Kriteria Penilaian Baru ${rCount}`,
+        title: "",
         desc: "",
-        max: 10
+        max: 0
       });
       renderTasksUI();
     }
