@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Master Portal Pemarkahan (Clean Copy)</title>
+  <title>Master Portal Pemarkahan IPG (Kemas Kini Ogos 2026)</title>
   
   <!-- Tailwind CSS & FontAwesome Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -21,28 +21,32 @@
 
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
-  <header class="bg-indigo-950 text-white shadow-lg sticky top-0 z-50">
+  <!-- HEADER PORTAL AKADEMIK IPG -->
+  <header class="bg-indigo-950 text-white shadow-xl sticky top-0 z-50 border-b border-amber-500/30">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center text-indigo-950 font-black text-xl shadow">
           <i class="fa-solid fa-graduation-cap"></i>
         </div>
         <div>
-          <h1 id="lblCourseTitle" class="font-black text-lg tracking-wide text-amber-400">MASTER PORTAL PEMARKAHAN</h1>
-          <p id="lblDeptTitle" class="text-xs text-indigo-200">Sistem Pentaksiran Bersepadu & Autonomi Akademik</p>
+          <h1 id="lblCourseTitle" class="font-black text-lg tracking-wide text-amber-400">MASTER PORTAL PEMARKAHAN IPG</h1>
+          <p id="lblDeptTitle" class="text-xs text-indigo-200">Piawaian Buku Panduan Pentaksiran Ogos 2026 & MQF 2.0</p>
         </div>
       </div>
 
       <!-- Navigation Tabs -->
       <nav id="mainNavTabs" class="flex items-center gap-2 overflow-x-auto py-1">
-        <button id="btnTabSetup" onclick="switchMainTab('setup')" class="px-4 py-2 rounded-lg text-xs font-bold bg-amber-500 text-indigo-950 shadow flex items-center gap-2">
+        <button id="btnTabSetup" onclick="switchMainTab('setup')" class="px-4 py-2 rounded-lg text-xs font-bold bg-amber-500 text-indigo-950 shadow flex items-center gap-2 transition hover:bg-amber-400">
           <i class="fa-solid fa-sliders"></i> Tetapan Master
         </button>
         <button id="btnTabInduk" onclick="switchMainTab('induk')" class="px-4 py-2 rounded-lg text-xs font-bold bg-indigo-900/50 hover:bg-indigo-800 text-indigo-200 flex items-center gap-2 opacity-50 cursor-not-allowed" disabled>
-          <i class="fa-solid fa-table-list"></i> Pemarkahan Induk
+          <i class="fa-solid fa-table-list"></i> Pemarkahan Induk (LAM-PT-04-01)
         </button>
         <button id="btnTabRubrik" onclick="switchMainTab('rubrik')" class="px-4 py-2 rounded-lg text-xs font-bold bg-indigo-900/50 hover:bg-indigo-800 text-indigo-200 flex items-center gap-2 opacity-50 cursor-not-allowed" disabled>
           <i class="fa-solid fa-clipboard-check"></i> Panel Rubrik
+        </button>
+        <button id="btnTabModerasi" onclick="switchMainTab('moderasi')" class="px-4 py-2 rounded-lg text-xs font-bold bg-indigo-900/50 hover:bg-indigo-800 text-indigo-200 flex items-center gap-2 opacity-50 cursor-not-allowed" disabled>
+          <i class="fa-solid fa-scale-balanced"></i> Moderasi (LAM-PT-04-02/04)
         </button>
       </nav>
 
@@ -54,23 +58,25 @@
     </div>
   </header>
 
+  <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-md"></div>
 
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
+  <!-- MAIN CONTENT CONTAINER -->
+  <main id="mainContainerLayout" class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
 
-    <!-- 1. TAB TETAPAN MASTER (SETUP WIZARD) -->
+    <!-- 1. TAB TETAPAN MASTER (SETUP WIZARD IPG 2026) -->
     <section id="tabSetup" class="block">
-      <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-200/80 overflow-hidden">
+      <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl border border-slate-200/80 overflow-hidden">
         
         <!-- Top Banner -->
-        <div class="bg-gradient-to-r from-indigo-900 via-indigo-950 to-slate-900 p-6 text-white border-b border-indigo-800/50">
+        <div class="bg-gradient-to-r from-indigo-950 via-indigo-900 to-slate-900 p-6 text-white border-b border-indigo-800/50">
           <div class="flex items-center justify-between">
             <div>
               <span class="text-xs font-bold uppercase tracking-widest text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20">
-                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Setup Wizard
+                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Setup Wizard IPG Ogos 2026
               </span>
               <h2 class="text-2xl font-extrabold mt-2 text-white">Panel Tetapan Master Portal</h2>
-              <p class="text-xs text-indigo-200 mt-1">Sila masukkan Pautan Google Sheet & Folder Drive anda, kemudian bina struktur tugasan dan kriteria HPP.</p>
+              <p class="text-xs text-indigo-200 mt-1">Satu portal disediakan bagi setiap kursus. Masukkan maklumat kursus, pautan Google Drive/Sheet, serta struktur HPP dan Rubrik.</p>
             </div>
             <div class="hidden sm:block text-5xl text-amber-400/20">
               <i class="fa-solid fa-gears"></i>
@@ -80,75 +86,78 @@
 
         <form id="frmSetupMaster" onsubmit="event.preventDefault(); saveMasterConfigFromUI();" class="p-6 md:p-8 space-y-8">
           
-          <!-- SECTION A: MAKLUMAT ASAS KURSUS -->
-          <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
-            <h3 class="text-sm font-bold text-indigo-950 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <i class="fa-solid fa-book text-amber-500"></i> A. Maklumat Asas Kursus
+          <!-- SECTION A: MAKLUMAT KURSUS & AKADEMIK -->
+          <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-4">
+            <h3 class="text-sm font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-book text-amber-500"></i> A. Maklumat Kursus IPG
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kod Kursus *</label>
-                <input type="text" id="cfgCourseCode" required placeholder="cth: MPU3221" class="w-full text-xs font-semibold p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none uppercase">
+                <input type="text" id="cfgCourseCode" required placeholder="cth: MPU3221 / MPU3421" class="w-full text-xs font-semibold p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 uppercase">
               </div>
               <div class="md:col-span-2">
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Kursus *</label>
-                <input type="text" id="cfgCourseName" required placeholder="cth: Pengurusan Persatuan / Permainan Olahraga" class="w-full text-xs font-semibold p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                <input type="text" id="cfgCourseName" required placeholder="cth: Pengurusan Persatuan / Permainan Olahraga" class="w-full text-xs font-semibold p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500">
               </div>
-              <div class="md:col-span-3">
+              <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Jabatan / Unit *</label>
-                <input type="text" id="cfgDept" required placeholder="cth: Unit Kokurikulum IPGKDA" class="w-full text-xs font-semibold p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                <input type="text" id="cfgDept" required value="Unit Kokurikulum IPGKDA" class="w-full text-xs font-semibold p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500">
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Sesi Akademik & Ambilan *</label>
+                <input type="text" id="cfgAcademicSession" required value="2026/2027 (Kemas Kini Ogos 2026)" class="w-full text-xs font-semibold p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500">
               </div>
             </div>
           </div>
 
-          <!-- SECTION B: PAUTAN PANGKALAN DATA -->
-          <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
-            <h3 class="text-sm font-bold text-indigo-950 uppercase tracking-wider mb-2 flex items-center gap-2">
+          <!-- SECTION B: PAUTAN GOOGLE WORKSPACE -->
+          <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-4">
+            <h3 class="text-sm font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-2">
               <i class="fa-solid fa-database text-blue-600"></i> B. Pautan Storan Google Workspace Anda
             </h3>
-            <p class="text-xs text-slate-500 mb-4">Tampal Pautan (URL) penuh atau ID daripada Google Sheet & Google Drive anda sendiri.</p>
+            <p class="text-xs text-slate-500">Tampal Pautan (URL) Google Sheet dan Folder Drive anda. Jika dibiarkan kosong, skrip akan **automatik menciptanya** di Drive anda.</p>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pautan / ID Google Sheet *</label>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pautan / ID Google Sheet</label>
                 <div class="relative">
                   <span class="absolute left-3 top-3 text-emerald-600 text-sm"><i class="fa-solid fa-file-excel"></i></span>
-                  <input type="text" id="cfgSheetLink" required placeholder="https://docs.google.com/spreadsheets/d/..." class="w-full text-xs font-mono p-3 pl-9 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                  <input type="text" id="cfgSheetLink" placeholder="https://docs.google.com/spreadsheets/d/1BEVsG4Y73VZo28DX7KFG1ipCS1J0oD-lyOHhyWQwPSY/edit" class="w-full text-xs font-mono p-3 pl-9 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
                 </div>
               </div>
               <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pautan / ID Folder Google Drive (Gambar)</label>
                 <div class="relative">
                   <span class="absolute left-3 top-3 text-amber-600 text-sm"><i class="fa-solid fa-folder-open"></i></span>
-                  <input type="text" id="cfgFolderLink" placeholder="https://drive.google.com/drive/folders/..." class="w-full text-xs font-mono p-3 pl-9 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                  <input type="text" id="cfgFolderLink" placeholder="https://drive.google.com/drive/folders/..." class="w-full text-xs font-mono p-3 pl-9 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500">
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- SECTION C: STRUKTUR TUGASAN & HPP -->
-          <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
-            <div class="flex justify-between items-center mb-4">
+          <!-- SECTION C: PEMBINA TUGASAN, HPP & KRITERIA RUBRIK -->
+          <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-4">
+            <div class="flex flex-wrap justify-between items-center gap-3">
               <div>
                 <h3 class="text-sm font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-2">
                   <i class="fa-solid fa-layer-group text-purple-600"></i> C. Pembina Tugasan, HPP & Kriteria Rubrik
                 </h3>
-                <p class="text-xs text-slate-500 mt-1">Anda boleh menentukan Mod (Individu/Kumpulan) dan Penilai (Single/Dual) pada setiap peringkat HPP.</p>
+                <p class="text-xs text-slate-500 mt-1">Tetapkan Mod Penilai (SINGLE / DUAL_AVG) dan Mod Tugasan (INDIVIDU / KUMPULAN) pada setiap HPP.</p>
               </div>
               <button type="button" onclick="addNewTaskUI()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow flex items-center gap-1">
                 <i class="fa-solid fa-plus"></i> Tambah Tugasan
               </button>
             </div>
 
-            <!-- Task Builder Container -->
             <div id="tasksContainerUI" class="space-y-6">
-              <!-- Dynamically populated via JS -->
+              <!-- Rendered via JavaScript -->
             </div>
           </div>
 
           <!-- SUBMIT BUTTON -->
           <div class="pt-4">
-            <button type="submit" id="btnSaveMaster" class="w-full py-4 bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-700 text-indigo-950 font-black text-sm uppercase tracking-wider rounded-xl shadow-lg transform transition active:scale-95 flex items-center justify-center gap-2">
+            <button type="submit" id="btnSaveMaster" class="w-full py-4 bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-700 text-indigo-950 font-black text-sm uppercase tracking-wider rounded-xl shadow-lg transform transition active:scale-98 flex items-center justify-center gap-2">
               <i class="fa-solid fa-cloud-arrow-up text-lg"></i> SIMPAN & INISIALISASI PANGKALAN DATA GOOGLE SHEETS
             </button>
           </div>
@@ -157,36 +166,46 @@
       </div>
     </section>
 
-    <!-- 2. TAB PEMARKAHAN INDUK (DIKUNCI SEHINGGA INITIALIZED) -->
+    <!-- 2. TAB PEMARKAHAN INDUK (LAM-PT-04-01) -->
     <section id="tabInduk" class="hidden">
       <div class="bg-white p-8 rounded-2xl shadow border border-slate-200 text-center py-16">
         <i class="fa-solid fa-lock text-5xl text-slate-300 mb-4"></i>
-        <h3 class="text-lg font-bold text-slate-700">Pangkalan Data Belum Diinisialisasi</h3>
-        <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">Sila lengkapkan Tetapan Master di atas dan tekan butang Inisialisasi untuk membuka panel pemarkahan ini.</p>
+        <h3 class="text-lg font-bold text-slate-700">Pemarkahan Induk Berkunci</h3>
+        <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">Sila lengkapkan Tetapan Master dan tekan butang Inisialisasi untuk membuka borang rasmi `LAM-PT-04-01` ini.</p>
       </div>
     </section>
 
-    <!-- 3. TAB PANEL RUBRIK (DIKUNCI SEHINGGA INITIALIZED) -->
+    <!-- 3. TAB PANEL RUBRIK -->
     <section id="tabRubrik" class="hidden">
       <div class="bg-white p-8 rounded-2xl shadow border border-slate-200 text-center py-16">
         <i class="fa-solid fa-lock text-5xl text-slate-300 mb-4"></i>
         <h3 class="text-lg font-bold text-slate-700">Panel Rubrik Belum Sedia</h3>
-        <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">Inisialisasi pangkalan data anda untuk menjana borang rubrik dynamically.</p>
+        <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">Selesaikan tetapan kriteria rubrik dalam Tetapan Master untuk menjana borang penilaian secara dinamik.</p>
+      </div>
+    </section>
+
+    <!-- 4. TAB MODERASI & AUDIT (LAM-PT-04-02 / 04) -->
+    <section id="tabModerasi" class="hidden">
+      <div class="bg-white p-8 rounded-2xl shadow border border-slate-200 text-center py-16">
+        <i class="fa-solid fa-lock text-5xl text-slate-300 mb-4"></i>
+        <h3 class="text-lg font-bold text-slate-700">Panel Moderasi Belum Sedia</h3>
+        <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">Inisialisasi pangkalan data untuk menguruskan 9 sampel moderasi (`LAM-PT-04-02`) dan laporan kes khas ($\ge 90\%$ / $< 50\%$).</p>
       </div>
     </section>
 
   </main>
 
   <script>
-    // Pautan API Web App Apps Script Utama
+    // Pautan API Pelayan Apps Script Utama
     const API = "https://script.google.com/macros/s/AKfycbz5wnt58tbwg-wYQH_UUnkDY-nJJebQiw4D2O5oSx-aKZmwyKT8pGiVkz7acdNU8Liu/exec";
 
-    // Dynamic State
+    // Konfigurasi Dynamic Kursus State
     let COURSE_CONFIG = {
       COURSE_CODE: "",
       COURSE_NAME: "",
-      DEPARTMENT: "",
-      SHEET_LINK: "",
+      DEPARTMENT: "Unit Kokurikulum IPGKDA",
+      ACADEMIC_SESSION: "2026/2027",
+      SHEET_LINK: "https://docs.google.com/spreadsheets/d/1BEVsG4Y73VZo28DX7KFG1ipCS1J0oD-lyOHhyWQwPSY/edit",
       FOLDER_LINK: "",
       TASKS: []
     };
@@ -195,17 +214,13 @@
       fetchActiveConfig();
     };
 
-    /**
-     * Memuatkan konfigurasi dari backend pelayan
-     */
     function fetchActiveConfig() {
       fetch(`${API}?action=getCourseConfig`)
         .then(res => res.json())
         .then(data => {
           if (data && data.status === "success" && data.config) {
-            const cfg = data.config;
-            if (cfg.IS_INITIALIZED) {
-              COURSE_CONFIG = cfg;
+            if (data.config.IS_INITIALIZED) {
+              COURSE_CONFIG = data.config;
               renderUIInitializedState();
             } else {
               renderInitialCleanBuilder();
@@ -220,28 +235,26 @@
         });
     }
 
-    /**
-     * Memaparkan status asal belum diinisialisasi
-     */
     function renderInitialCleanBuilder() {
-      document.getElementById('lblCourseTitle').innerText = "MASTER PORTAL (BELUM DIINISIALISASI)";
-      document.getElementById('lblDeptTitle').innerText = "Sila atur tetapan master di bawah";
+      document.getElementById('lblCourseTitle').innerText = "MASTER PORTAL IPG (BELUM DIINISIALISASI)";
+      document.getElementById('lblDeptTitle').innerText = "Sila atur tetapan master di bawah mengikut Buku Panduan Pentaksiran IPG Ogos 2026";
       
-      // Sediakan tugasan contoh 1 secara automatik untuk memudahkan pengisian
       if (!COURSE_CONFIG.TASKS || COURSE_CONFIG.TASKS.length === 0) {
         COURSE_CONFIG.TASKS = [
           {
             id: "t1",
-            title: "Tugasan 1",
+            title: "Tugasan 1: Penulisan Akademik",
             weight: 40,
             hps: [
               {
                 id: "hp1",
                 code: "HP1",
-                title: "Pengetahuan & Penulisan",
+                title: "Analisis & Pengetahuan",
                 maxScore: 30,
                 mode: "INDIVIDU",
                 evaluatorMode: "SINGLE",
+                rubricLevel: "5_TAHAP",
+                tags: ["6C_Critical", "VBE_Integriti"],
                 rubrics: [
                   { id: "r1", code: "R1", title: "Kejelasan Isu", desc: "Ulasan kritikal", max: 15 },
                   { id: "r2", code: "R2", title: "Pengolahan Idea", desc: "Struktur perenggan", max: 15 }
@@ -254,34 +267,29 @@
       renderTasksUI();
     }
 
-    /**
-     * Memaparkan status portal apabila sudah berjaya diinisialisasi
-     */
     function renderUIInitializedState() {
       document.getElementById('lblCourseTitle').innerText = `${COURSE_CONFIG.COURSE_CODE} — ${COURSE_CONFIG.COURSE_NAME}`;
-      document.getElementById('lblDeptTitle').innerText = COURSE_CONFIG.DEPARTMENT || "Jabatan Akademik";
+      document.getElementById('lblDeptTitle').innerText = `${COURSE_CONFIG.DEPARTMENT} | Sesi ${COURSE_CONFIG.ACADEMIC_SESSION || '2026/2027'}`;
 
       document.getElementById('cfgCourseCode').value = COURSE_CONFIG.COURSE_CODE || "";
       document.getElementById('cfgCourseName').value = COURSE_CONFIG.COURSE_NAME || "";
       document.getElementById('cfgDept').value = COURSE_CONFIG.DEPARTMENT || "";
+      document.getElementById('cfgAcademicSession').value = COURSE_CONFIG.ACADEMIC_SESSION || "";
       document.getElementById('cfgSheetLink').value = COURSE_CONFIG.SHEET_LINK || COURSE_CONFIG.SHEET_ID || "";
       document.getElementById('cfgFolderLink').value = COURSE_CONFIG.FOLDER_LINK || COURSE_CONFIG.TARGET_FOLDER_ID || "";
 
       // Nyahkunci butang navigasi
-      const btnInduk = document.getElementById('btnTabInduk');
-      const btnRubrik = document.getElementById('btnTabRubrik');
-
-      btnInduk.classList.remove('opacity-50', 'cursor-not-allowed');
-      btnInduk.disabled = false;
-      btnRubrik.classList.remove('opacity-50', 'cursor-not-allowed');
-      btnRubrik.disabled = false;
+      ['btnTabInduk', 'btnTabRubrik', 'btnTabModerasi'].forEach(btnId => {
+        const btn = document.getElementById(btnId);
+        if (btn) {
+          btn.classList.remove('opacity-50', 'cursor-not-allowed');
+          btn.disabled = false;
+        }
+      });
 
       renderTasksUI();
     }
 
-    /**
-     * Menjana borang input Tugasan, HPP dan Kriteria secara dinamik
-     */
     function renderTasksUI() {
       const container = document.getElementById('tasksContainerUI');
       container.innerHTML = "";
@@ -302,13 +310,13 @@
             if (hp.rubrics && hp.rubrics.length > 0) {
               hp.rubrics.forEach((rub, rIndex) => {
                 rubricsHTML += `
-                  <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200 text-xs">
+                  <div class="flex flex-wrap items-center gap-2 bg-white p-2 rounded-lg border border-slate-200 text-xs">
                     <span class="font-bold text-slate-500 w-8">#${rIndex+1}</span>
-                    <input type="text" value="${rub.title || ''}" placeholder="Nama Kriteria" onchange="updateRubricField(${tIndex}, ${hpIndex}, ${rIndex}, 'title', this.value)" class="flex-1 p-1.5 border rounded">
-                    <input type="text" value="${rub.desc || ''}" placeholder="Penerangan Singkat" onchange="updateRubricField(${tIndex}, ${hpIndex}, ${rIndex}, 'desc', this.value)" class="flex-1 p-1.5 border rounded">
-                    <div class="flex items-center gap-1 w-24">
-                      <span class="text-[10px] text-slate-400">Max:</span>
-                      <input type="number" step="0.1" value="${rub.max || 10}" onchange="updateRubricField(${tIndex}, ${hpIndex}, ${rIndex}, 'max', this.value)" class="w-full p-1.5 border rounded font-semibold text-center">
+                    <input type="text" value="${rub.title || ''}" placeholder="Nama Kriteria / Aspek" onchange="updateRubricField(${tIndex}, ${hpIndex}, ${rIndex}, 'title', this.value)" class="flex-1 min-w-[150px] p-1.5 border rounded focus:ring-1 focus:ring-amber-500">
+                    <input type="text" value="${rub.desc || ''}" placeholder="Penerangan / Deskriptor Ringkas" onchange="updateRubricField(${tIndex}, ${hpIndex}, ${rIndex}, 'desc', this.value)" class="flex-1 min-w-[180px] p-1.5 border rounded focus:ring-1 focus:ring-amber-500">
+                    <div class="flex items-center gap-1 w-28">
+                      <span class="text-[10px] text-slate-400 font-bold">Max:</span>
+                      <input type="number" step="0.1" value="${rub.max || 10}" onchange="updateRubricField(${tIndex}, ${hpIndex}, ${rIndex}, 'max', this.value)" class="w-full p-1.5 border rounded font-bold text-center">
                     </div>
                     <button type="button" onclick="removeRubric(${tIndex}, ${hpIndex}, ${rIndex})" class="text-rose-500 hover:text-rose-700 p-1.5"><i class="fa-solid fa-xmark"></i></button>
                   </div>
@@ -319,21 +327,27 @@
             hpsHTML += `
               <div class="bg-indigo-50/40 p-4 rounded-xl border border-indigo-100 space-y-3">
                 <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-lg border border-indigo-100">
-                  <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                  <div class="flex items-center gap-2 flex-1 min-w-[220px]">
                     <span class="text-xs font-black text-indigo-950 bg-indigo-100 px-2.5 py-1 rounded">HPP ${hpIndex+1}</span>
-                    <input type="text" value="${hp.code || 'HP'+(hpIndex+1)}" placeholder="Kod (cth: HP1)" onchange="updateHPField(${tIndex}, ${hpIndex}, 'code', this.value)" class="w-20 p-1.5 text-xs font-bold border rounded uppercase text-center">
+                    <input type="text" value="${hp.code || 'HP'+(hpIndex+1)}" placeholder="Kod (HP1)" onchange="updateHPField(${tIndex}, ${hpIndex}, 'code', this.value)" class="w-20 p-1.5 text-xs font-bold border rounded uppercase text-center">
                     <input type="text" value="${hp.title || ''}" placeholder="Tajuk Hasil Pembelajaran" onchange="updateHPField(${tIndex}, ${hpIndex}, 'title', this.value)" class="flex-1 p-1.5 text-xs border rounded font-medium">
                   </div>
 
-                  <div class="flex items-center gap-2">
-                    <select onchange="updateHPField(${tIndex}, ${hpIndex}, 'mode', this.value)" class="p-1.5 text-xs font-semibold border rounded bg-white text-slate-700">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <select onchange="updateHPField(${tIndex}, ${hpIndex}, 'mode', this.value)" class="p-1.5 text-xs font-bold border rounded bg-white text-slate-700">
                       <option value="INDIVIDU" ${hp.mode === 'INDIVIDU' ? 'selected' : ''}>👤 INDIVIDU</option>
-                      <option value="KUMPULAN" ${hp.mode === 'KUMPULAN' ? 'selected' : ''}>👥 KUMPULAN</option>
+                      <option value="KUMPULAN" ${hp.mode === 'KUMPULAN' ? 'selected' : ''}>👥 KUMPULAN (Max 50% PB)</option>
                     </select>
 
-                    <select onchange="updateHPField(${tIndex}, ${hpIndex}, 'evaluatorMode', this.value)" class="p-1.5 text-xs font-semibold border rounded bg-white text-slate-700">
+                    <select onchange="updateHPField(${tIndex}, ${hpIndex}, 'evaluatorMode', this.value)" class="p-1.5 text-xs font-bold border rounded bg-white text-slate-700">
                       <option value="SINGLE" ${hp.evaluatorMode === 'SINGLE' ? 'selected' : ''}>Penilai Tunggal (SINGLE)</option>
                       <option value="DUAL_AVG" ${hp.evaluatorMode === 'DUAL_AVG' ? 'selected' : ''}>Dwi-Penilai Purata (P1+P2)/2</option>
+                    </select>
+
+                    <select onchange="updateHPField(${tIndex}, ${hpIndex}, 'rubricLevel', this.value)" class="p-1.5 text-xs font-bold border rounded bg-white text-slate-700">
+                      <option value="3_TAHAP" ${hp.rubricLevel === '3_TAHAP' ? 'selected' : ''}>Skala 3-Tahap</option>
+                      <option value="4_TAHAP" ${hp.rubricLevel === '4_TAHAP' ? 'selected' : ''}>Skala 4-Tahap</option>
+                      <option value="5_TAHAP" ${hp.rubricLevel === '5_TAHAP' || !hp.rubricLevel ? 'selected' : ''}>Skala 5-Tahap (IPG Standard)</option>
                     </select>
 
                     <div class="flex items-center gap-1 w-28">
@@ -348,7 +362,7 @@
                 <!-- Sub-Rubrics Section -->
                 <div class="pl-2 space-y-2">
                   <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider"><i class="fa-solid fa-list-check mr-1"></i> Sub-Kriteria Rubrik</span>
+                    <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider"><i class="fa-solid fa-list-check mr-1"></i> Sub-Kriteria Rubrik (Sehingga 10+ Item)</span>
                     <button type="button" onclick="addRubric(${tIndex}, ${hpIndex})" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800"><i class="fa-solid fa-plus mr-1"></i> Tambah Kriteria</button>
                   </div>
                   <div class="space-y-2">${rubricsHTML}</div>
@@ -362,7 +376,7 @@
           <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
             <div class="flex items-center gap-2 flex-1 min-w-[240px]">
               <span class="w-8 h-8 rounded-lg bg-amber-500 text-indigo-950 font-black flex items-center justify-center text-xs">${tIndex+1}</span>
-              <input type="text" value="${task.title || ''}" placeholder="Tajuk Tugasan (cth: Kuiz 1 / Amali / Pembentangan)" onchange="updateTaskField(${tIndex}, 'title', this.value)" class="flex-1 p-2 text-xs font-bold border rounded-lg focus:ring-2 focus:ring-amber-500">
+              <input type="text" value="${task.title || ''}" placeholder="Tajuk Tugasan (cth: Penulisan Esei / Pembentangan Amali / Kuiz)" onchange="updateTaskField(${tIndex}, 'title', this.value)" class="flex-1 p-2 text-xs font-bold border rounded-lg focus:ring-2 focus:ring-amber-500">
             </div>
 
             <div class="flex items-center gap-3">
@@ -384,7 +398,7 @@
       });
     }
 
-    // Helper functions for updating state
+    // Helper State Operations
     function addNewTaskUI() {
       if (!COURSE_CONFIG.TASKS) COURSE_CONFIG.TASKS = [];
       const newTIndex = COURSE_CONFIG.TASKS.length + 1;
@@ -400,7 +414,8 @@
             maxScore: 20,
             mode: "INDIVIDU",
             evaluatorMode: "SINGLE",
-            rubrics: [{ id: `r_${Date.now()}`, code: "R1", title: "Kriteria 1", desc: "Deskripsi kriteria", max: 10 }]
+            rubricLevel: "5_TAHAP",
+            rubrics: [{ id: `r_${Date.now()}`, code: "R1", title: "Kriteria 1", desc: "Deskripsi", max: 10 }]
           }
         ]
       });
@@ -426,6 +441,7 @@
         maxScore: 20,
         mode: "INDIVIDU",
         evaluatorMode: "SINGLE",
+        rubricLevel: "5_TAHAP",
         rubrics: [{ id: `r_${Date.now()}`, code: "R1", title: "Kriteria 1", desc: "", max: 10 }]
       });
       renderTasksUI();
@@ -463,18 +479,16 @@
       COURSE_CONFIG.TASKS[tIdx].hps[hpIdx].rubrics[rIdx][field] = val;
     }
 
-    /**
-     * Menghantar tetapan master dari UI ke backend Apps Script
-     */
     function saveMasterConfigFromUI() {
       const btn = document.getElementById('btnSaveMaster');
       btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-lg"></i> MENYIMPAN & MENJANA PANGKALAN DATA...`;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-lg"></i> MENYIMPAN & MENJANA PANGKALAN DATA IPG 2026...`;
 
       const payload = {
         COURSE_CODE: document.getElementById('cfgCourseCode').value.trim(),
         COURSE_NAME: document.getElementById('cfgCourseName').value.trim(),
         DEPARTMENT: document.getElementById('cfgDept').value.trim(),
+        ACADEMIC_SESSION: document.getElementById('cfgAcademicSession').value.trim(),
         SHEET_LINK: document.getElementById('cfgSheetLink').value.trim(),
         FOLDER_LINK: document.getElementById('cfgFolderLink').value.trim(),
         TASKS: COURSE_CONFIG.TASKS
@@ -505,22 +519,17 @@
       });
     }
 
-    /**
-     * Memukar navigasi tab utama
-     */
     function switchMainTab(tab) {
-      document.getElementById('tabSetup').classList.add('hidden');
-      document.getElementById('tabInduk').classList.add('hidden');
-      document.getElementById('tabRubrik').classList.add('hidden');
+      ['tabSetup', 'tabInduk', 'tabRubrik', 'tabModerasi'].forEach(tId => {
+        document.getElementById(tId).classList.add('hidden');
+      });
 
       if (tab === 'setup') document.getElementById('tabSetup').classList.remove('hidden');
       if (tab === 'induk') document.getElementById('tabInduk').classList.remove('hidden');
       if (tab === 'rubrik') document.getElementById('tabRubrik').classList.remove('hidden');
+      if (tab === 'moderasi') document.getElementById('tabModerasi').classList.remove('hidden');
     }
 
-    /**
-     * Menampilkan mesej Toast akademik moden
-     */
     function showToast(msg, type = "info") {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
