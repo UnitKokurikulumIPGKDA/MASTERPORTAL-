@@ -286,6 +286,9 @@
       });
 
       renderTasksUI();
+      
+      // Automatic Tab Switch to Pemarkahan Induk when initialized
+      switchMainTab('induk');
     }
 
     function renderTasksUI() {
@@ -524,14 +527,41 @@
     }
 
     function switchMainTab(tab) {
+      // Sembunyikan semua section
       ['tabSetup', 'tabInduk', 'tabRubrik', 'tabModerasi'].forEach(tId => {
-        document.getElementById(tId).classList.add('hidden');
+        const sec = document.getElementById(tId);
+        if (sec) sec.classList.add('hidden');
       });
 
-      if (tab === 'setup') document.getElementById('tabSetup').classList.remove('hidden');
-      if (tab === 'induk') document.getElementById('tabInduk').classList.remove('hidden');
-      if (tab === 'rubrik') document.getElementById('tabRubrik').classList.remove('hidden');
-      if (tab === 'moderasi') document.getElementById('tabModerasi').classList.remove('hidden');
+      // Reset gaya butang navigasi
+      const navMap = {
+        'setup': 'btnTabSetup',
+        'induk': 'btnTabInduk',
+        'rubrik': 'btnTabRubrik',
+        'moderasi': 'btnTabModerasi'
+      };
+
+      Object.keys(navMap).forEach(key => {
+        const btn = document.getElementById(navMap[key]);
+        if (btn && !btn.disabled) {
+          btn.className = "px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition bg-indigo-900/50 hover:bg-indigo-800 text-indigo-200";
+        }
+      });
+
+      // Tunjukkan section dipilih & serlahkan butang aktif
+      if (tab === 'setup') {
+        document.getElementById('tabSetup').classList.remove('hidden');
+        document.getElementById('btnTabSetup').className = "px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition bg-amber-500 text-indigo-950 shadow hover:bg-amber-400";
+      } else if (tab === 'induk') {
+        document.getElementById('tabInduk').classList.remove('hidden');
+        document.getElementById('btnTabInduk').className = "px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition bg-amber-500 text-indigo-950 shadow hover:bg-amber-400";
+      } else if (tab === 'rubrik') {
+        document.getElementById('tabRubrik').classList.remove('hidden');
+        document.getElementById('btnTabRubrik').className = "px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition bg-amber-500 text-indigo-950 shadow hover:bg-amber-400";
+      } else if (tab === 'moderasi') {
+        document.getElementById('tabModerasi').classList.remove('hidden');
+        document.getElementById('btnTabModerasi').className = "px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition bg-amber-500 text-indigo-950 shadow hover:bg-amber-400";
+      }
     }
 
     function showToast(msg, type = "info") {
