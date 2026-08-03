@@ -323,7 +323,7 @@
             }
 
             // Dapatkan lencana HP secara dinamik berdasarkan input pengguna
-            const dynamicHpBadge = (hp.code && hp.code.trim() !== "") ? hp.code.toUpperCase().trim() : `HP ${hpIndex+1}`;
+            const dynamicHpBadge = (hp.code && hp.code.trim() !== "") ? hp.code.toUpperCase().trim() : "KOD HP";
 
             hpsHTML += `
               <div class="bg-indigo-50/40 p-4 rounded-xl border border-indigo-100 space-y-3">
@@ -402,7 +402,7 @@
     function updateHPBadgeLive(tIdx, hpIdx, val) {
       const badge = document.getElementById(`badge_hp_${tIdx}_${hpIdx}`);
       if (badge) {
-        badge.innerText = (val && val.trim() !== "") ? val.toUpperCase().trim() : `HP ${hpIdx+1}`;
+        badge.innerText = (val && val.trim() !== "") ? val.toUpperCase().trim() : "KOD HP";
       }
     }
 
