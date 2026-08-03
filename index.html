@@ -1,840 +1,688 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Master Portal Pemarkahan IPG (Kemas Kini Ogos 2026)</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Penilaian & Moderasi IPGKDA</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #1e3a8a;    
+            --primary-hover: #1e40af;
+            --secondary: #9f1239;  
+            --bg-body: #f8fafc;    
+            --bg-surface: #ffffff; 
+            --bg-alt: #f1f5f9;     
+            --text-main: #0f172a;  
+            --text-muted: #64748b; 
+            --border: #e2e8f0;     
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
 
-  <!-- Tailwind CSS & FontAwesome Icons -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-body); min-height: 100vh; color: var(--text-main); }
+        .font-serif-title { font-family: 'Lora', serif; }
+        .font-mono-score { font-family: 'Space Mono', monospace; }
+        
+        .shell { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 1.5rem; }
+        .academic-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 1rem; box-shadow: var(--shadow-sm); }
+        
+        .btn-primary { background: var(--primary); border: 1px solid var(--primary); cursor: pointer; transition: all 0.2s ease-in-out; color: white; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; box-shadow: var(--shadow-sm); }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+        .btn-primary:disabled { background: #94a3b8; border-color: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; font-size: 11px; }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: #f8fafc; }
 
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-  </style>
+        .tab-bar { display: flex; gap: 6px; background: var(--bg-alt); padding: 6px; border-radius: 0.75rem; border: 1px solid var(--border); }
+        .tab { flex: 1; padding: 10px; border-radius: 0.5rem; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s; background: transparent; border: none; color: var(--text-muted); }
+        .tab.active { background: var(--bg-surface); color: var(--primary); box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
+
+        .s-card { padding: 14px 16px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 0.75rem; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; border-left: 4px solid transparent; }
+        .s-card:hover { background: var(--bg-alt); border-left-color: #94a3b8; }
+        .s-card.selected { background: #eff6ff; border-left-color: var(--primary); border-color: #bfdbfe; }
+
+        .scroll-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+        .scroll-thin::-webkit-scrollbar-track { background: var(--bg-alt); border-radius: 10px; }
+        .scroll-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        input[type=number], input[type=text], input[type=password], textarea, select { background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-main); outline: none; transition: all 0.2s; border-radius: 0.5rem; padding: 0.75rem 1rem; }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1); }
+
+        .disclaimer-bar { background: #1e293b; border-bottom: 2px solid var(--secondary); padding: 10px 24px; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 11px; color: #f8fafc; letter-spacing: 0.02em; text-align: center; position: sticky; top: 0; z-index: 100; }
+        .disclaimer-bar strong { color: #facc15; font-weight: 700; }
+
+        .academic-table { width: 100%; border-collapse: collapse; font-size: 12.5px; background: var(--bg-surface); }
+        .academic-table th { background: var(--bg-alt); padding: 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); border-bottom: 2px solid var(--border); border-top: 1px solid var(--border); }
+        .academic-table td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        .academic-table tbody tr:hover { background: #f8fafc; }
+
+        .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Print Styles */
+        #printArea, #printIndividualArea { display: none; }
+        @media print {
+            @page { size: A4 portrait; margin: 8mm; }
+            body > *:not(#printArea):not(#printIndividualArea) { display: none !important; }
+            body.printing-mode #printArea.active-print { display: block !important; }
+            body.printing-mode #printIndividualArea.active-print { display: block !important; }
+            body.printing-mode { background: white !important; }
+        }
+    </style>
 </head>
+<body>
 
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+<!-- TOAST NOTIFICATION -->
+<div id="toastContainer" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 max-w-sm"></div>
 
-  <!-- HEADER PORTAL AKADEMIK IPG -->
-  <header class="bg-indigo-950 text-white shadow-xl sticky top-0 z-50 border-b border-amber-500/30">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center text-indigo-950 font-black text-xl shadow">
-          <i class="fa-solid fa-graduation-cap"></i>
+<!-- LOADER -->
+<div id="loadingScreen" class="shell bg-slate-900 text-white flex-col gap-4">
+    <div class="spinner" style="width:40px; height:40px; border-width:4px;"></div>
+    <div class="font-bold tracking-widest uppercase text-sm animate-pulse">Menghubungi Pangkalan Data...</div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- 1. SETUP WIZARD (Jika portal belum diinisialisasi) -->
+<!-- ========================================================================= -->
+<div id="setupWizard" class="hidden shell">
+    <div class="academic-card w-full max-w-4xl shadow-2xl overflow-hidden">
+        <div class="bg-indigo-950 p-6 text-white text-center border-b-4 border-amber-500">
+            <h1 class="font-serif-title text-2xl font-bold">Portal Setup Wizard (IPG 2026)</h1>
+            <p class="text-xs text-indigo-200 mt-2">Sila daftarkan maklumat kursus, HPP, dan kriteria rubrik anda.</p>
         </div>
-        <div>
-          <h1 id="lblCourseTitle" class="font-black text-lg tracking-wide text-amber-400">MASTER PORTAL PEMARKAHAN IPG</h1>
-          <p id="lblDeptTitle" class="text-xs text-indigo-200">Piawaian Buku Panduan Pentaksiran Ogos 2026 & MQF 2.0</p>
-        </div>
-      </div>
-
-      <!-- Navigation Tabs -->
-      <nav id="mainNavTabs" class="flex items-center gap-2 overflow-x-auto py-1">
-        <button id="btnTabSetup" onclick="switchMainTab('setup')" class="px-4 py-2 rounded-lg text-xs font-bold bg-amber-500 text-indigo-950 shadow flex items-center gap-2 transition hover:bg-amber-400">
-          <i class="fa-solid fa-sliders"></i> Tetapan Master
-        </button>
-        <button id="btnTabInduk" onclick="switchMainTab('induk')" class="px-4 py-2 rounded-lg text-xs font-bold bg-indigo-900/50 hover:bg-indigo-800 text-indigo-200 flex items-center gap-2">
-          <i class="fa-solid fa-table-list"></i> Pemarkahan Induk (LAM-PT-04-01)
-        </button>
-        <button id="btnTabRubrik" onclick="switchMainTab('rubrik')" class="px-4 py-2 rounded-lg text-xs font-bold bg-indigo-900/50 hover:bg-indigo-800 text-indigo-200 flex items-center gap-2">
-          <i class="fa-solid fa-clipboard-check"></i> Panel Rubrik
-        </button>
-        <button id="btnTabModerasi" onclick="switchMainTab('moderasi')" class="px-4 py-2 rounded-lg text-xs font-bold bg-indigo-900/50 hover:bg-indigo-800 text-indigo-200 flex items-center gap-2">
-          <i class="fa-solid fa-scale-balanced"></i> Moderasi (LAM-PT-04-02/04)
-        </button>
-      </nav>
-
-      <div class="flex items-center gap-3">
-        <span class="text-xs px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold" id="lblUserRole">
-          <i class="fa-solid fa-user-shield mr-1"></i> Super Admin
-        </span>
-      </div>
-    </div>
-  </header>
-
-  <!-- TOAST NOTIFICATION CONTAINER -->
-  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-md"></div>
-
-  <!-- MAIN CONTENT CONTAINER -->
-  <main id="mainContainerLayout" class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
-
-    <!-- ================================================================= -->
-    <!-- TAB 1: TETAPAN MASTER / SETUP WIZARD -->
-    <!-- ================================================================= -->
-    <section id="tabSetup" class="block">
-      <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl border border-slate-200/80 overflow-hidden">
-        
-        <div class="bg-gradient-to-r from-indigo-950 via-indigo-900 to-slate-900 p-6 text-white border-b border-indigo-800/50">
-          <div class="flex items-center justify-between">
-            <div>
-              <span class="text-xs font-bold uppercase tracking-widest text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20">
-                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Setup Wizard IPG Ogos 2026
-              </span>
-              <h2 class="text-2xl font-extrabold mt-2 text-white">Panel Tetapan Master Portal</h2>
-              <p class="text-xs text-indigo-200 mt-1">Satu portal disediakan bagi setiap kursus. Masukkan maklumat kursus, pautan Google Drive/Sheet, serta struktur HPP dan Rubrik anda dari tapak bersih.</p>
-            </div>
-            <div class="hidden sm:block text-5xl text-amber-400/20">
-              <i class="fa-solid fa-gears"></i>
-            </div>
-          </div>
-        </div>
-
-        <form id="frmSetupMaster" onsubmit="event.preventDefault(); saveMasterConfigFromUI();" class="p-6 md:p-8 space-y-8">
-          
-          <!-- SECTION A: MAKLUMAT KURSUS -->
-          <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-4">
-            <h3 class="text-sm font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-book text-amber-500"></i> A. Maklumat Kursus IPG
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kod Kursus *</label>
-                <input type="text" id="cfgCourseCode" required placeholder="cth: MPU3421" class="w-full text-xs font-semibold p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 uppercase">
-              </div>
-              <div class="md:col-span-2">
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Kursus *</label>
-                <input type="text" id="cfgCourseName" required placeholder="cth: Permainan Olahraga" class="w-full text-xs font-semibold p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Jabatan / Unit *</label>
-                <input type="text" id="cfgDept" required placeholder="cth: Unit Kokurikulum IPGKDA" class="w-full text-xs font-semibold p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500">
-              </div>
-              <div class="md:col-span-2">
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Sesi Akademik & Ambilan *</label>
-                <input type="text" id="cfgAcademicSession" required placeholder="cth: 2026/2027 (Ambilan Jun 2026)" class="w-full text-xs font-semibold p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500">
-              </div>
-            </div>
-          </div>
-
-          <!-- SECTION B: PAUTAN WORKSPACE -->
-          <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-4">
-            <h3 class="text-sm font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-database text-blue-600"></i> B. Pautan Storan Google Workspace Anda
-            </h3>
-            <p class="text-xs text-slate-500">Tampal Pautan (URL) Google Sheet dan Folder Drive anda. Jika dibiarkan kosong, skrip akan **automatik menciptanya** di Drive anda.</p>
-            
+        <div class="p-8 space-y-6 bg-slate-50">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pautan / ID Google Sheet</label>
-                <div class="relative">
-                  <span class="absolute left-3 top-3 text-emerald-600 text-sm"><i class="fa-solid fa-file-excel"></i></span>
-                  <input type="text" id="cfgSheetLink" placeholder="https://docs.google.com/spreadsheets/d/..." class="w-full text-xs font-mono p-3 pl-9 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kod Kursus (Cth: MPU3221)</label>
+                    <input type="text" id="cfgCourseCode" class="w-full text-sm font-bold uppercase">
                 </div>
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pautan / ID Folder Google Drive (Gambar)</label>
-                <div class="relative">
-                  <span class="absolute left-3 top-3 text-amber-600 text-sm"><i class="fa-solid fa-folder-open"></i></span>
-                  <input type="text" id="cfgFolderLink" placeholder="https://drive.google.com/drive/folders/..." class="w-full text-xs font-mono p-3 pl-9 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Kursus</label>
+                    <input type="text" id="cfgCourseName" class="w-full text-sm font-bold">
                 </div>
-              </div>
             </div>
-          </div>
-
-          <!-- SECTION C: PEMBINA TUGASAN & HPP -->
-          <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-4">
-            <div class="flex flex-wrap justify-between items-center gap-3">
-              <div>
-                <h3 class="text-sm font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-2">
-                  <i class="fa-solid fa-layer-group text-purple-600"></i> C. Pembina Tugasan, HPP & Kriteria Rubrik
-                </h3>
-                <p class="text-xs text-slate-500 mt-1">Bina tugasan, tetapkan HPP, serta masukkan kriteria rubrik anda dari tapak bersih (kosong).</p>
-              </div>
-              <button type="button" onclick="addNewTaskUI()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow flex items-center gap-1">
-                <i class="fa-solid fa-plus"></i> Tambah Tugasan
-              </button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pautan Google Sheet (Pangkalan Data)</label>
+                    <input type="text" id="cfgSheetLink" placeholder="https://docs.google.com/spreadsheets/d/..." class="w-full text-xs font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pautan Google Drive (Gambar Pelajar)</label>
+                    <input type="text" id="cfgFolderLink" placeholder="https://drive.google.com/drive/folders/..." class="w-full text-xs font-mono">
+                </div>
             </div>
 
-            <div id="tasksContainerUI" class="space-y-6"></div>
-          </div>
+            <!-- PEMBINA TUGASAN DINAMIK -->
+            <div class="border border-slate-300 rounded-xl p-5 bg-white">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-sm text-indigo-900 uppercase">Struktur Tugasan & HP</h3>
+                    <button onclick="addTaskUI()" class="bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold shadow hover:bg-emerald-700">+ Tambah Tugasan</button>
+                </div>
+                <div id="setupTasksContainer" class="space-y-6"></div>
+            </div>
 
-          <!-- SUBMIT BUTTON -->
-          <div class="pt-4">
-            <button type="submit" id="btnSaveMaster" class="w-full py-4 bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-700 text-indigo-950 font-black text-sm uppercase tracking-wider rounded-xl shadow-lg transform transition active:scale-98 flex items-center justify-center gap-2">
-              <i class="fa-solid fa-cloud-arrow-up text-lg"></i> SIMPAN & INISIALISASI PANGKALAN DATA GOOGLE SHEETS
+            <button onclick="saveMasterConfigFromUI()" id="btnSaveMaster" class="btn-primary w-full py-4 rounded-xl shadow-lg flex items-center justify-center gap-2">
+                <i class="fas fa-cloud-upload-alt text-lg"></i> SIMPAN & INISIALISASI PANGKALAN DATA
             </button>
-          </div>
-
-        </form>
-      </div>
-    </section>
-
-    <!-- ================================================================= -->
-    <!-- TAB 2: PEMARKAHAN INDUK (LAM-PT-04-01) -->
-    <!-- ================================================================= -->
-    <section id="tabInduk" class="hidden">
-      <div class="space-y-6">
-        
-        <!-- Header Banner -->
-        <div class="bg-white p-6 rounded-2xl shadow border border-slate-200 flex flex-wrap justify-between items-center gap-4">
-          <div>
-            <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-wider border border-indigo-200">
-              <i class="fa-solid fa-table-list mr-1"></i> Borang Rasmi LAM-PT-04-01
-            </span>
-            <h2 class="text-xl font-black text-indigo-950 mt-1">Pemarkahan Induk Kursus</h2>
-            <p class="text-xs text-slate-500">Masukkan senarai pelajar dan markah mengikut HPP. Pengiraan Purata Dwi-Penilai dan Gred Rasmi IPG dikira secara automatik.</p>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <button onclick="toggleAddStudentDrawer()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow flex items-center gap-2">
-              <i class="fa-solid fa-user-plus"></i> + Tambah Pelajar
-            </button>
-            <button onclick="saveAllMarksToCloud()" id="btnSaveMarks" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black text-xs rounded-xl shadow flex items-center gap-2">
-              <i class="fa-solid fa-floppy-disk text-sm"></i> Simpan Markah Ke Cloud
-            </button>
-          </div>
         </div>
+    </div>
+</div>
 
-        <!-- Add Student Drawer -->
-        <div id="addStudentDrawer" class="hidden bg-slate-50 p-5 rounded-2xl border border-slate-300 space-y-4">
-          <h3 class="text-xs font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-2">
-            <i class="fa-solid fa-user-gear text-amber-500"></i> Mendaftar Pelajar Baharu
-          </h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
-            <input type="text" id="newStdNama" placeholder="Nama Pelajar" class="p-2.5 text-xs font-semibold border rounded-lg">
-            <input type="text" id="newStdKp" placeholder="No. KP (cth: 020512025112)" class="p-2.5 text-xs font-semibold border rounded-lg">
-            <input type="text" id="newStdGiliran" placeholder="Angka Giliran" class="p-2.5 text-xs font-semibold border rounded-lg">
-            <input type="text" id="newStdKelas" placeholder="Kelas / Unit" class="p-2.5 text-xs font-semibold border rounded-lg">
-            <button onclick="addNewStudentFromUI()" class="p-2.5 bg-indigo-900 text-white font-bold text-xs rounded-lg hover:bg-indigo-800">
-              <i class="fa-solid fa-check mr-1"></i> Daftar
+<!-- ========================================================================= -->
+<!-- 2. OPERATIONAL PORTAL (Jika sudah diinisialisasi) -->
+<!-- ========================================================================= -->
+<div id="operationalPortal" class="hidden flex-col min-h-screen">
+    <div class="disclaimer-bar" id="globalDisclaimer">
+        <i class="fas fa-landmark" style="color:#facc15; font-size:14px;"></i>
+        <span style="flex:1;">
+            <strong>SISTEM MAKLUMAT SULIT & TERHAD</strong>
+            <span class="sep">|</span> <span id="lblDept">Unit Kokurikulum IPGKDA</span>
+            <span class="sep">|</span> Kod Kursus: <strong id="lblCourse">MPU0000</strong>
+        </span>
+    </div>
+
+    <!-- 2A. LOGIN SCREEN -->
+    <div class="shell" id="loginScreen">
+        <div class="academic-card w-full shadow-2xl p-8 sm:p-10 border-t-4" style="max-width:440px; border-top-color: var(--primary);">
+            <div class="text-center mb-8">
+                <div style="font-size:10px; font-weight:800; letter-spacing:0.15em; color:var(--secondary); text-transform:uppercase; margin-bottom:8px;">Institut Pendidikan Guru</div>
+                <h1 class="font-serif-title" style="font-size:1.75rem; font-weight:700; color:var(--text-main); line-height:1.2; margin-bottom:4px;">Portal Pemarkahan</h1>
+                <p id="lblCourseNameLogin" style="font-size:13px; color:var(--text-muted); font-weight:500;">Sila Log Masuk</p>
+            </div>
+
+            <div class="tab-bar mb-6">
+                <button class="tab active" id="ts" onclick="setType('student')"><i class="fas fa-user-graduate me-1"></i> Ruang Pelajar</button>
+                <button class="tab" id="tl" onclick="setType('lecturer')"><i class="fas fa-chalkboard-teacher me-1"></i> Ruang Pensyarah</button>
+            </div>
+
+            <div class="flex flex-col gap-4 mb-6">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">Kredensial Log Masuk</label>
+                    <input type="text" id="idIn" placeholder="No. Kad Pengenalan / Emel Rasmi" class="w-full font-mono-score text-center font-bold">
+                </div>
+                <div id="pwField" class="hidden">
+                    <input type="password" id="pwIn" placeholder="Kata Laluan Pensyarah" class="w-full text-center">
+                </div>
+            </div>
+
+            <button onclick="handleAuth()" id="loginBtn" class="btn-primary w-full rounded-lg p-4 text-sm mt-2">
+                <i class="fas fa-sign-in-alt me-2"></i> Akses Sistem
             </button>
-          </div>
         </div>
+    </div>
 
-        <!-- Interactive Table Container -->
-        <div class="bg-white rounded-2xl shadow border border-slate-200 overflow-hidden">
-          <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-left text-xs border-collapse">
-              <thead id="indukTableHeader" class="bg-indigo-950 text-white uppercase text-[11px] tracking-wider sticky top-0">
-                <!-- Dynamic Header via JS -->
-              </thead>
-              <tbody id="indukTableBody" class="divide-y divide-slate-200">
-                <!-- Dynamic Rows via JS -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ================================================================= -->
-    <!-- TAB 3: PANEL RUBRIK -->
-    <!-- ================================================================= -->
-    <section id="tabRubrik" class="hidden">
-      <div class="bg-white p-8 rounded-2xl shadow border border-slate-200 text-center py-16">
-        <i class="fa-solid fa-clipboard-check text-5xl text-slate-300 mb-4"></i>
-        <h3 class="text-lg font-bold text-slate-700">Panel Penilaian Rubrik Sub-Kriteria</h3>
-        <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">Gunakan kriteria rubrik yang ditetapkan dalam Tetapan Master untuk menilai sub-aspek pelajar secara teliti.</p>
-      </div>
-    </section>
-
-    <!-- ================================================================= -->
-    <!-- TAB 4: MODERASI -->
-    <!-- ================================================================= -->
-    <section id="tabModerasi" class="hidden">
-      <div class="bg-white p-8 rounded-2xl shadow border border-slate-200 text-center py-16">
-        <i class="fa-solid fa-scale-balanced text-5xl text-slate-300 mb-4"></i>
-        <h3 class="text-lg font-bold text-slate-700">Panel Moderasi & Audit (LAM-PT-04-02 / 04)</h3>
-        <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">Pengurusan 9 sampel moderasi (3 Tinggi, 3 Sederhana, 3 Rendah) serta audit kes khas (≥90% / <50%).</p>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- JAVASCRIPT ENGINE -->
-  <script>
-    // Pautan API Pelayan Apps Script (UNTUK SUBJEK TERTENTU)
-    // Untuk REPO MASTER TEMPLATE, BIARKAN PADA URL TEMPLAT ATAU KOSONGKAN
-    const API = "";
-
-    let COURSE_CONFIG = {
-      COURSE_CODE: "",
-      COURSE_NAME: "",
-      DEPARTMENT: "",
-      ACADEMIC_SESSION: "",
-      SHEET_LINK: "",
-      FOLDER_LINK: "",
-      IS_INITIALIZED: false,
-      TASKS: []
-    };
-
-    let STUDENT_LIST = [];
-    let MARKS_CACHE = {};
-
-    window.onload = function() {
-      fetchActiveConfig();
-    };
-
-    function fetchActiveConfig() {
-      if (!API || API.trim() === "") {
-        renderInitialCleanBuilder();
-        return;
-      }
-
-      fetch(`${API}?action=getCourseConfig`)
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.status === "success" && data.config) {
-            COURSE_CONFIG = data.config;
-            if (COURSE_CONFIG.IS_INITIALIZED) {
-              renderUIInitializedState();
-              loadStudentList();
-            } else {
-              renderInitialCleanBuilder();
-            }
-          } else {
-            renderInitialCleanBuilder();
-          }
-        })
-        .catch(err => {
-          console.warn("Gagal memuatkan konfigurasi:", err);
-          renderInitialCleanBuilder();
-        });
-    }
-
-    function renderInitialCleanBuilder() {
-      document.getElementById('lblCourseTitle').innerText = "MASTER PORTAL IPG (BELUM DIINISIALISASI)";
-      document.getElementById('lblDeptTitle').innerText = "Sila atur tetapan master di bawah mengikut Buku Panduan Pentaksiran IPG Ogos 2026";
-      
-      if (!COURSE_CONFIG.TASKS || COURSE_CONFIG.TASKS.length === 0) {
-        COURSE_CONFIG.TASKS = [
-          {
-            id: `t_${Date.now()}`,
-            title: "",
-            weight: 0,
-            hps: [
-              {
-                id: `hp_${Date.now()}`,
-                code: "",
-                title: "",
-                maxScore: 0,
-                mode: "INDIVIDU",
-                evaluatorMode: "SINGLE",
-                rubricLevel: "5_TAHAP",
-                rubrics: [{ id: `r_${Date.now()}`, title: "", desc: "", max: 0 }]
-              }
-            ]
-          }
-        ];
-      }
-      renderTasksUI();
-    }
-
-    function renderUIInitializedState() {
-      document.getElementById('lblCourseTitle').innerText = `${COURSE_CONFIG.COURSE_CODE || 'KURSUS'} — ${COURSE_CONFIG.COURSE_NAME || 'NAMA KURSUS'}`;
-      document.getElementById('lblDeptTitle').innerText = `${COURSE_CONFIG.DEPARTMENT || 'JABATAN'} | Sesi ${COURSE_CONFIG.ACADEMIC_SESSION || '2026/2027'}`;
-
-      document.getElementById('cfgCourseCode').value = COURSE_CONFIG.COURSE_CODE || "";
-      document.getElementById('cfgCourseName').value = COURSE_CONFIG.COURSE_NAME || "";
-      document.getElementById('cfgDept').value = COURSE_CONFIG.DEPARTMENT || "";
-      document.getElementById('cfgAcademicSession').value = COURSE_CONFIG.ACADEMIC_SESSION || "";
-      document.getElementById('cfgSheetLink').value = COURSE_CONFIG.SHEET_LINK || COURSE_CONFIG.SHEET_ID || "";
-      document.getElementById('cfgFolderLink').value = COURSE_CONFIG.FOLDER_LINK || COURSE_CONFIG.TARGET_FOLDER_ID || "";
-
-      renderTasksUI();
-      switchMainTab('induk');
-    }
-
-    function renderTasksUI() {
-      const container = document.getElementById('tasksContainerUI');
-      container.innerHTML = "";
-
-      if (!COURSE_CONFIG.TASKS || COURSE_CONFIG.TASKS.length === 0) {
-        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">Tiada tugasan lagi. Klik "+ Tambah Tugasan" untuk bermula.</div>`;
-        return;
-      }
-
-      COURSE_CONFIG.TASKS.forEach((task, tIndex) => {
-        const taskCard = document.createElement('div');
-        taskCard.className = "bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4";
-
-        let hpsHTML = "";
-        if (task.hps && task.hps.length > 0) {
-          task.hps.forEach((hp, hpIndex) => {
-            let rubricsHTML = "";
-            if (hp.rubrics && hp.rubrics.length > 0) {
-              hp.rubrics.forEach((rub, rIndex) => {
-                rubricsHTML += `
-                  <div class="flex flex-wrap items-center gap-2 bg-white p-2 rounded-lg border border-slate-200 text-xs">
-                    <span class="font-bold text-slate-500 w-8">#${rIndex+1}</span>
-                    <input type="text" value="${rub.title || ''}" placeholder="Nama Kriteria / Aspek" onchange="updateRubricField(${tIndex}, ${hpIndex}, ${rIndex}, 'title', this.value)" class="flex-1 min-w-[150px] p-1.5 border rounded focus:ring-1 focus:ring-amber-500">
-                    <input type="text" value="${rub.desc || ''}" placeholder="Penerangan / Deskriptor Ringkas" onchange="updateRubricField(${tIndex}, ${hpIndex}, ${rIndex}, 'desc', this.value)" class="flex-1 min-w-[180px] p-1.5 border rounded focus:ring-1 focus:ring-amber-500">
-                    <div class="flex items-center gap-1 w-28">
-                      <span class="text-[10px] text-slate-400 font-bold">Max:</span>
-                      <input type="number" step="0.1" value="${rub.max || ''}" placeholder="0" onchange="updateRubricField(${tIndex}, ${hpIndex}, ${rIndex}, 'max', this.value)" class="w-full p-1.5 border rounded font-bold text-center">
+    <!-- 2B. LECTURER DASHBOARD (Dinamik) -->
+    <div id="lecturerDash" style="display:none; flex-direction:column; flex:1;">
+        <div style="background:var(--primary); color:white; padding:16px 32px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; box-shadow:var(--shadow-md);">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <div style="width:40px; height:40px; background:rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px;"><i class="fas fa-chalkboard-teacher"></i></div>
+                <div>
+                    <div style="font-size:10px; font-weight:700; letter-spacing:0.1em; color:rgba(255,255,255,0.7); text-transform:uppercase; display:flex; align-items:center; gap:8px;">
+                        <span>Ruang Kerja Pensyarah</span>
+                        <span id="adminBadge" style="display:none; background:#facc15; color:#78350f; padding:2px 8px; border-radius:10px; font-size:9px; font-weight:800;"><i class="fas fa-crown me-1"></i>SUPER ADMIN</span>
                     </div>
-                    <button type="button" onclick="removeRubric(${tIndex}, ${hpIndex}, ${rIndex})" class="text-rose-500 hover:text-rose-700 p-1.5"><i class="fa-solid fa-xmark"></i></button>
-                  </div>
-                `;
-              });
-            }
+                    <div id="lecName" class="font-serif-title" style="font-size:16px; font-weight:700;">--</div>
+                </div>
+            </div>
+            <button onclick="logout()" class="btn-outline px-4 py-2 rounded-lg" style="border-color:rgba(255,255,255,0.3); color:white;"><i class="fas fa-sign-out-alt me-1"></i> Log Keluar</button>
+        </div>
 
-            const dynamicHpBadge = (hp.code && hp.code.trim() !== "") ? hp.code.toUpperCase().trim() : "KOD HP";
+        <div style="padding:24px 32px 0; background:white; border-bottom:1px solid var(--border);">
+            <div class="tab-bar" style="background:transparent; border:none; padding:0; gap:10px; margin-bottom:-1px; overflow-x:auto;">
+                <button class="tab active" onclick="showLecTab('marking')" style="border-radius:0; border-bottom:3px solid transparent; padding:12px 12px;"><i class="fas fa-calculator me-1"></i> Pemarkahan Induk</button>
+                <button class="tab" onclick="showLecTab('rubrik')" style="border-radius:0; border-bottom:3px solid transparent; padding:12px 12px;"><i class="fas fa-clipboard-list me-1"></i> Panel Rubrik</button>
+                <button class="tab" onclick="showLecTab('summary')" style="border-radius:0; border-bottom:3px solid transparent; padding:12px 12px;"><i class="fas fa-table me-1"></i> Buku Rekod</button>
+                <button class="tab" onclick="showLecTab('laporan')" style="border-radius:0; border-bottom:3px solid transparent; padding:12px 12px;"><i class="fas fa-chart-column me-1"></i> Analisis Gred</button>
+            </div>
+            <style>#lecturerDash .tab-bar .tab.active { background:transparent; color:var(--primary); border-bottom-color:var(--primary); box-shadow:none; } #lecturerDash .tab-bar .tab:hover:not(.active) { background:var(--bg-body); color:var(--text-main); border-bottom-color:var(--border); }</style>
+        </div>
 
-            hpsHTML += `
-              <div class="bg-indigo-50/40 p-4 rounded-xl border border-indigo-100 space-y-3">
-                <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-lg border border-indigo-100">
-                  <div class="flex items-center gap-2 flex-1 min-w-[220px]">
-                    <span class="text-xs font-black text-indigo-950 bg-indigo-100 px-2.5 py-1 rounded" id="badge_hp_${tIndex}_${hpIndex}">${dynamicHpBadge}</span>
-                    <input type="text" value="${hp.code || ''}" placeholder="Kod (cth: HP3 / HPP2)" oninput="updateHPBadgeLive(${tIndex}, ${hpIndex}, this.value)" onchange="updateHPField(${tIndex}, ${hpIndex}, 'code', this.value)" class="w-28 p-1.5 text-xs font-bold border rounded uppercase text-center">
-                    <input type="text" value="${hp.title || ''}" placeholder="Tajuk Hasil Pembelajaran / HPP" onchange="updateHPField(${tIndex}, ${hpIndex}, 'title', this.value)" class="flex-1 p-1.5 text-xs border rounded font-medium">
-                  </div>
+        <div style="padding:24px 32px; display:grid; grid-template-columns:320px 1fr; gap:24px; flex:1;">
+            
+            <!-- LEFT PANEL: STUDENT LIST -->
+            <div class="academic-card p-4" style="align-self: start; position: sticky; top: 110px; max-height: calc(100vh - 130px); display: flex; flex-direction: column;">
+                <div class="flex justify-between items-center mb-3 px-1">
+                    <span class="text-[11px] font-bold uppercase tracking-wider">Senarai Calon</span>
+                    <span id="classInfo" class="font-mono-score text-[10px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200"></span>
+                </div>
+                <div class="mb-3 px-1 space-y-2">
+                    <select id="classFilter" onchange="filterStudents()" class="w-full text-xs font-bold p-2 bg-slate-50 border rounded-lg"><option value="">Semua Kelas</option></select>
+                    <input type="text" id="searchStudent" placeholder="Cari nama atau KP..." class="w-full text-xs p-2 bg-slate-50 border rounded-lg" onkeyup="filterStudents()">
+                </div>
+                <div id="sList" class="scroll-thin flex-1 overflow-y-auto pr-1"></div>
+            </div>
 
-                  <div class="flex flex-wrap items-center gap-2">
-                    <select onchange="updateHPField(${tIndex}, ${hpIndex}, 'mode', this.value)" class="p-1.5 text-xs font-bold border rounded bg-white text-slate-700">
-                      <option value="INDIVIDU" ${hp.mode === 'INDIVIDU' ? 'selected' : ''}>👤 INDIVIDU</option>
-                      <option value="KUMPULAN" ${hp.mode === 'KUMPULAN' ? 'selected' : ''}>👥 KUMPULAN (Max 50% PB)</option>
-                    </select>
-
-                    <select onchange="updateHPField(${tIndex}, ${hpIndex}, 'evaluatorMode', this.value)" class="p-1.5 text-xs font-bold border rounded bg-white text-slate-700">
-                      <option value="SINGLE" ${hp.evaluatorMode === 'SINGLE' ? 'selected' : ''}>Penilai Tunggal (SINGLE)</option>
-                      <option value="DUAL_AVG" ${hp.evaluatorMode === 'DUAL_AVG' ? 'selected' : ''}>Dwi-Penilai Purata (P1+P2)/2</option>
-                    </select>
-
-                    <select onchange="updateHPField(${tIndex}, ${hpIndex}, 'rubricLevel', this.value)" class="p-1.5 text-xs font-bold border rounded bg-white text-slate-700">
-                      <option value="3_TAHAP" ${hp.rubricLevel === '3_TAHAP' ? 'selected' : ''}>Skala 3-Tahap</option>
-                      <option value="4_TAHAP" ${hp.rubricLevel === '4_TAHAP' ? 'selected' : ''}>Skala 4-Tahap</option>
-                      <option value="5_TAHAP" ${hp.rubricLevel === '5_TAHAP' || !hp.rubricLevel ? 'selected' : ''}>Skala 5-Tahap (IPG Standard)</option>
-                    </select>
-
-                    <div class="flex items-center gap-1 w-28">
-                      <span class="text-[10px] font-bold text-slate-500">Max Score:</span>
-                      <input type="number" step="0.1" value="${hp.maxScore || ''}" placeholder="0" onchange="updateHPField(${tIndex}, ${hpIndex}, 'maxScore', this.value)" class="w-full p-1.5 text-xs font-bold border rounded text-center">
+            <!-- RIGHT PANEL: WORKSPACE -->
+            <div style="min-width: 0;">
+                
+                <!-- MARKING TAB -->
+                <div id="ltab-marking">
+                    <div id="gradingEmpty" class="academic-card p-12 flex flex-col items-center justify-center border-dashed border-2 bg-slate-50 min-h-[500px] text-center text-slate-400">
+                        <i class="fas fa-hand-pointer text-4xl mb-4"></i>
+                        <h4 class="font-serif-title text-xl font-bold text-slate-700 mb-2">Modul Pemarkahan Induk (LAM-PT-04-01)</h4>
+                        <p class="text-xs">Sila pilih nama pelajar dari senarai di sebelah kiri untuk mula mengisi markah HP.</p>
                     </div>
 
-                    <button type="button" onclick="removeHP(${tIndex}, ${hpIndex})" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-trash-can"></i></button>
-                  </div>
+                    <div id="gradingPanel" style="display:none;" class="space-y-6">
+                        <div class="academic-card p-6 flex justify-between items-center bg-white border-l-4 border-indigo-600">
+                            <div>
+                                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Calon Dinilai</div>
+                                <div id="ln" class="font-serif-title text-2xl font-bold text-slate-800">--</div>
+                                <div id="lk" class="font-mono-score text-sm text-slate-500 mt-1">--</div>
+                            </div>
+                            <div class="text-right">
+                                <button onclick="printIndividualReport()" class="btn-primary text-xs px-4 py-2 rounded-lg bg-indigo-900 border-indigo-900 shadow-sm"><i class="fas fa-file-pdf me-1"></i> Cetak Dossier</button>
+                            </div>
+                        </div>
+
+                        <div id="dynamicMarkingContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+
+                        <div class="academic-card p-8 flex justify-between items-center bg-slate-900 text-white">
+                            <div>
+                                <div class="text-xs text-slate-400 uppercase tracking-widest mb-2">Pencapaian 100%</div>
+                                <div class="flex items-baseline gap-3"><span id="tm" class="font-mono-score text-5xl font-black text-sky-400">0.0</span><span class="text-lg text-slate-500 font-bold">/ 100</span></div>
+                            </div>
+                            <div class="text-right border-l border-slate-700 pl-8">
+                                <div class="text-xs text-slate-400 uppercase tracking-widest mb-2">Gred Rasmi IPG</div>
+                                <div id="gd" class="font-serif-title text-6xl font-bold text-amber-400">F</div>
+                            </div>
+                        </div>
+
+                        <div id="justArea" class="hidden">
+                            <label class="block text-xs font-bold text-amber-700 uppercase mb-2"><i class="fas fa-exclamation-triangle me-1"></i> Justifikasi Wajib (Gred A+ / Amat Cemerlang)</label>
+                            <textarea id="justTxt" rows="3" placeholder="Sila taipkan rasional pencapaian cemerlang calon..." class="w-full text-sm font-semibold border-amber-300 bg-amber-50 focus:ring-amber-500"></textarea>
+                        </div>
+
+                        <button onclick="saveManualScores()" id="saveManualBtn" class="btn-primary w-full py-4 rounded-xl text-sm mt-4 shadow-lg"><i class="fas fa-save me-2"></i> SIMPAN MARKAH CALON INI</button>
+                    </div>
                 </div>
 
-                <div class="pl-2 space-y-2">
-                  <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider"><i class="fa-solid fa-list-check mr-1"></i> Sub-Kriteria Rubrik</span>
-                    <button type="button" onclick="addRubric(${tIndex}, ${hpIndex})" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800"><i class="fa-solid fa-plus mr-1"></i> Tambah Kriteria</button>
-                  </div>
-                  <div class="space-y-2">${rubricsHTML}</div>
+                <!-- RUBRIK TAB -->
+                <div id="ltab-rubrik" style="display:none;">
+                    <div id="rubrikEmpty" class="academic-card p-12 flex flex-col items-center justify-center border-dashed border-2 bg-slate-50 min-h-[500px] text-center text-slate-400">
+                        <i class="fas fa-clipboard-list text-4xl mb-4"></i>
+                        <h4 class="font-serif-title text-xl font-bold text-slate-700 mb-2">Panel Rubrik Perincian</h4>
+                        <p class="text-xs">Sila pilih nama pelajar dari senarai di sebelah kiri untuk menilai rubrik.</p>
+                    </div>
+                    <div id="rubrikPanel" style="display:none;" class="space-y-6">
+                        <div class="academic-card p-6 flex justify-between items-center bg-white border-l-4 border-amber-500">
+                            <div><div id="rName" class="font-serif-title text-2xl font-bold text-slate-800">--</div><div id="rKP" class="font-mono-score text-sm text-slate-500 mt-1">--</div></div>
+                            <span id="rBadge" class="hidden bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-lg text-xs font-bold"><i class="fas fa-check-circle me-1"></i> Terekod</span>
+                        </div>
+                        <div id="dynamicRubrikContainer" class="space-y-6"></div>
+                        <button onclick="saveRubrik()" id="saveRubrikBtn" class="btn-primary w-full py-4 rounded-xl text-sm shadow-lg"><i class="fas fa-cloud-upload-alt me-2"></i> SIMPAN KEPUTUSAN RUBRIK</button>
+                    </div>
                 </div>
-              </div>
-            `;
-          });
-        }
 
-        taskCard.innerHTML = `
-          <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
-            <div class="flex items-center gap-2 flex-1 min-w-[240px]">
-              <span class="w-8 h-8 rounded-lg bg-amber-500 text-indigo-950 font-black flex items-center justify-center text-xs">${tIndex+1}</span>
-              <input type="text" value="${task.title || ''}" placeholder="Tajuk Tugasan (cth: Tugasan 1: Penulisan / Amali)" onchange="updateTaskField(${tIndex}, 'title', this.value)" class="flex-1 p-2 text-xs font-bold border rounded-lg focus:ring-2 focus:ring-amber-500">
+                <!-- SUMMARY TAB -->
+                <div id="ltab-summary" style="display:none;">
+                    <div class="academic-card p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-serif-title text-xl font-bold text-slate-800">Buku Rekod Pemarkahan Induk (LAM-PT-04-01)</h3>
+                            <button onclick="renderSummaryTable()" class="btn-outline px-3 py-1.5 rounded bg-white"><i class="fas fa-sync-alt"></i> Segar</button>
+                        </div>
+                        <div class="overflow-x-auto border border-slate-200 rounded-xl custom-scrollbar">
+                            <table class="academic-table" id="summaryTable">
+                                <thead id="summaryHeader"><tr><th>Nama Calon</th><th>Jumlah</th><th>Gred</th></tr></thead>
+                                <tbody id="summaryBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LAPORAN TAB -->
+                <div id="ltab-laporan" style="display:none;">
+                    <div class="academic-card p-6 text-center py-20 text-slate-400">
+                        <i class="fas fa-chart-column text-5xl mb-4"></i>
+                        <h3 class="text-xl font-bold text-slate-700">Modul Analisis Gred</h3>
+                        <p class="text-sm">Analisis taburan gred dan statistik kelas akan dijana di sini.</p>
+                    </div>
+                </div>
+
             </div>
+        </div>
+    </div>
+</div>
 
+<!-- ========================================================================= -->
+<!-- JAVASCRIPT ENGINE (Dinamik penuh berasaskan CONFIG) -->
+<!-- ========================================================================= -->
+<script>
+// Gantikan dengan URL Web App Apps Script anda!
+const API = ""; 
+
+let CONFIG = null, sData = [], curS = null, curLecEmail = null, isAdminUser = false;
+let tempSetupTasks = [];
+
+const COLORS = ['#4338ca', '#0369a1', '#15803d', '#b45309', '#7c3aed', '#be123c'];
+
+// --- UTILITI ---
+function showToast(msg, type='success') {
+    const cont = document.getElementById('toastContainer');
+    const bg = type === 'success' ? 'bg-emerald-800 border-emerald-600 text-white' : 'bg-rose-800 border-rose-600 text-white';
+    const ic = type === 'success' ? 'fa-check-circle text-emerald-300' : 'fa-exclamation-triangle text-rose-300';
+    const t = document.createElement('div');
+    t.className = `p-4 rounded-xl shadow-2xl border flex items-center gap-3 transform transition duration-300 translate-x-0 ${bg}`;
+    t.innerHTML = `<i class="fas ${ic} text-xl"></i><span class="text-xs font-bold">${msg}</span>`;
+    cont.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(()=>t.remove(),300); }, 3000);
+}
+function roundTo1(n) { const v = Number(n); return isNaN(v) ? 0 : Math.round(v * 10) / 10; }
+function fmt1(n) { return roundTo1(n).toFixed(1); }
+function calculateGred(m) {
+  if (m >= 90) return "A+"; if (m >= 80) return "A"; if (m >= 75) return "A-"; if (m >= 70) return "B+";
+  if (m >= 65) return "B";  if (m >= 60) return "B-"; if (m >= 55) return "C+"; if (m >= 50) return "C";
+  if (m >= 40) return "C-"; if (m >= 30) return "D+"; if (m >= 20) return "D";  return "F";
+}
+
+// --- INISIALISASI UTAMA ---
+window.onload = async () => {
+    try {
+        const r = await fetch(`${API}?action=getCourseConfig`); const o = await r.json();
+        if (o.status === 'success') {
+            CONFIG = o.config;
+            document.getElementById('loadingScreen').style.display = 'none';
+            if (CONFIG.IS_INITIALIZED) initOperationalPortal();
+            else initSetupWizard();
+        } else { throw new Error("Gagal membaca konfigurasi."); }
+    } catch(e) {
+        document.getElementById('loadingScreen').innerHTML = `<div class="text-rose-400 font-bold"><i class="fas fa-exclamation-triangle text-3xl mb-2"></i><br>Sila pastikan URL API diisi dengan betul di dalam kod index.html.</div>`;
+    }
+};
+
+// =========================================================================
+// SETUP WIZARD (JIKA BELUM INIT)
+// =========================================================================
+function initSetupWizard() {
+    document.getElementById('setupWizard').style.display = 'flex';
+    tempSetupTasks = CONFIG.TASKS && CONFIG.TASKS.length > 0 ? CONFIG.TASKS : [{ title:"", weight:0, hps:[{code:"", maxScore:0, rubrics:[{nama:"", max:0}]}] }];
+    renderSetupTasks();
+}
+function renderSetupTasks() {
+    const c = document.getElementById('setupTasksContainer');
+    c.innerHTML = tempSetupTasks.map((t, tIdx) => `
+        <div class="p-4 border border-slate-200 bg-slate-50 rounded-xl space-y-4">
             <div class="flex items-center gap-3">
-              <div class="flex items-center gap-1 bg-slate-100 px-3 py-1.5 rounded-lg border">
-                <span class="text-xs font-bold text-slate-600">Wajaran:</span>
-                <input type="number" step="1" value="${task.weight || ''}" placeholder="0" onchange="updateTaskField(${tIndex}, 'weight', this.value)" class="w-14 p-1 text-xs font-black text-center bg-white border rounded">
-                <span class="text-xs font-bold text-slate-600">%</span>
-              </div>
-
-              <button type="button" onclick="addHP(${tIndex})" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow"><i class="fa-solid fa-plus mr-1"></i> Tambah HPP</button>
-              <button type="button" onclick="removeTask(${tIndex})" class="p-2 text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash-can"></i></button>
+                <span class="w-6 h-6 bg-indigo-900 text-white rounded text-xs font-bold flex items-center justify-center">${tIdx+1}</span>
+                <input type="text" value="${t.title}" placeholder="Tajuk Tugasan" onchange="tempSetupTasks[${tIdx}].title=this.value" class="flex-1 text-xs font-bold p-2 border rounded">
+                <div class="flex items-center gap-1"><input type="number" value="${t.weight}" onchange="tempSetupTasks[${tIdx}].weight=Number(this.value)" class="w-16 text-xs p-2 border rounded font-bold text-center"><span class="text-xs font-bold">%</span></div>
+                <button onclick="addHPSetup(${tIdx})" class="text-xs font-bold text-indigo-700 bg-indigo-100 px-2 py-1.5 rounded hover:bg-indigo-200">+ HP</button>
             </div>
-          </div>
+            <div class="pl-4 border-l-2 border-indigo-200 space-y-3">
+                ${t.hps.map((hp, hpIdx) => `
+                    <div class="bg-white p-3 border rounded shadow-sm">
+                        <div class="flex items-center gap-2 mb-2">
+                            <input type="text" value="${hp.code}" placeholder="Kod (Cth: HP1)" onchange="tempSetupTasks[${tIdx}].hps[${hpIdx}].code=this.value" class="w-20 text-xs font-bold p-1.5 border rounded uppercase text-center">
+                            <input type="number" value="${hp.maxScore}" placeholder="Max Markah" onchange="tempSetupTasks[${tIdx}].hps[${hpIdx}].maxScore=Number(this.value)" class="w-24 text-xs font-bold p-1.5 border rounded text-center">
+                            <button onclick="addRubrikSetup(${tIdx},${hpIdx})" class="text-[10px] font-bold text-emerald-600"><i class="fas fa-plus"></i> Kriteria Rubrik</button>
+                        </div>
+                        <div class="space-y-1">
+                            ${hp.rubrics.map((r, rIdx) => `
+                                <div class="flex items-center gap-2">
+                                    <input type="text" value="${r.nama}" placeholder="Perkara dinilai" onchange="tempSetupTasks[${tIdx}].hps[${hpIdx}].rubrics[${rIdx}].nama=this.value" class="flex-1 text-[11px] p-1 border rounded">
+                                    <input type="number" value="${r.max}" placeholder="Max" onchange="tempSetupTasks[${tIdx}].hps[${hpIdx}].rubrics[${rIdx}].max=Number(this.value)" class="w-16 text-[11px] p-1 border rounded font-bold text-center">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+function addTaskUI() { tempSetupTasks.push({ title:"", weight:0, hps:[{code:"", maxScore:0, rubrics:[{nama:"", max:0}]}] }); renderSetupTasks(); }
+function addHPSetup(tIdx) { tempSetupTasks[tIdx].hps.push({code:"", maxScore:0, rubrics:[{nama:"", max:0}]}); renderSetupTasks(); }
+function addRubrikSetup(tIdx, hpIdx) { tempSetupTasks[tIdx].hps[hpIdx].rubrics.push({nama:"", max:0}); renderSetupTasks(); }
 
-          <div class="space-y-4">${hpsHTML}</div>
-        `;
+async function saveMasterConfigFromUI() {
+    const btn = document.getElementById('btnSaveMaster'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span> MENJANA PANGKALAN DATA...';
+    const pl = {
+        COURSE_CODE: document.getElementById('cfgCourseCode').value, COURSE_NAME: document.getElementById('cfgCourseName').value,
+        SHEET_LINK: document.getElementById('cfgSheetLink').value, FOLDER_LINK: document.getElementById('cfgFolderLink').value,
+        TASKS: tempSetupTasks
+    };
+    try {
+        const r = await fetch(API, {method:'POST', mode:'no-cors', body:JSON.stringify({action:"saveMasterConfig", config:pl})});
+        await new Promise(r=>setTimeout(r,2000)); location.reload();
+    } catch(e) { showToast('Ralat transmisi.', 'error'); btn.disabled=false; btn.innerHTML='CUBA LAGI'; }
+}
 
-        container.appendChild(taskCard);
-      });
-    }
+// =========================================================================
+// OPERATIONAL PORTAL (JIKA SUDAH INIT)
+// =========================================================================
+function initOperationalPortal() {
+    document.getElementById('operationalPortal').style.display = 'flex';
+    document.getElementById('lblCourse').textContent = CONFIG.COURSE_CODE;
+    document.getElementById('lblCourseNameLogin').textContent = `${CONFIG.COURSE_CODE} — ${CONFIG.COURSE_NAME}`;
+    document.title = `${CONFIG.COURSE_CODE} | Portal Pemarkahan IPG`;
+    
+    // Bina UI Dinamik
+    buildDynamicMarkingPanel();
+    buildDynamicSummaryTable();
+}
 
-    function updateHPBadgeLive(tIdx, hpIdx, val) {
-      const badge = document.getElementById(`badge_hp_${tIdx}_${hpIdx}`);
-      if (badge) {
-        badge.innerText = (val && val.trim() !== "") ? val.toUpperCase().trim() : "KOD HP";
-      }
-    }
+function setType(t) {
+    document.getElementById('ts').classList.toggle('active', t==='student');
+    document.getElementById('tl').classList.toggle('active', t==='lecturer');
+    document.getElementById('pwField').style.display = t==='lecturer' ? 'block' : 'none';
+}
 
-    function addNewTaskUI() {
-      if (!COURSE_CONFIG.TASKS) COURSE_CONFIG.TASKS = [];
-      COURSE_CONFIG.TASKS.push({
-        id: `t_${Date.now()}`,
-        title: "",
-        weight: 0,
-        hps: [{
-          id: `hp_${Date.now()}`,
-          code: "",
-          title: "",
-          maxScore: 0,
-          mode: "INDIVIDU",
-          evaluatorMode: "SINGLE",
-          rubricLevel: "5_TAHAP",
-          rubrics: [{ id: `r_${Date.now()}`, title: "", desc: "", max: 0 }]
-        }]
-      });
-      renderTasksUI();
-    }
-
-    function removeTask(tIdx) { COURSE_CONFIG.TASKS.splice(tIdx, 1); renderTasksUI(); }
-    function updateTaskField(tIdx, field, val) { if (field === 'weight') val = parseFloat(val) || 0; COURSE_CONFIG.TASKS[tIdx][field] = val; }
-    function addHP(tIdx) {
-      COURSE_CONFIG.TASKS[tIdx].hps.push({
-        id: `hp_${Date.now()}`, code: "", title: "", maxScore: 0, mode: "INDIVIDU", evaluatorMode: "SINGLE", rubricLevel: "5_TAHAP",
-        rubrics: [{ id: `r_${Date.now()}`, title: "", desc: "", max: 0 }]
-      });
-      renderTasksUI();
-    }
-    function removeHP(tIdx, hpIdx) { COURSE_CONFIG.TASKS[tIdx].hps.splice(hpIdx, 1); renderTasksUI(); }
-    function updateHPField(tIdx, hpIdx, field, val) { if (field === 'maxScore') val = parseFloat(val) || 0; COURSE_CONFIG.TASKS[tIdx].hps[hpIdx][field] = val; }
-    function addRubric(tIdx, hpIdx) { COURSE_CONFIG.TASKS[tIdx].hps[hpIdx].rubrics.push({ id: `r_${Date.now()}`, title: "", desc: "", max: 0 }); renderTasksUI(); }
-    function removeRubric(tIdx, hpIdx, rIdx) { COURSE_CONFIG.TASKS[tIdx].hps[hpIdx].rubrics.splice(rIdx, 1); renderTasksUI(); }
-    function updateRubricField(tIdx, hpIdx, rIdx, field, val) { if (field === 'max') val = parseFloat(val) || 0; COURSE_CONFIG.TASKS[tIdx].hps[hpIdx].rubrics[rIdx][field] = val; }
-
-    function saveMasterConfigFromUI() {
-      if (!API || API.trim() === "") {
-        showToast("Ralat: URL API Apps Script belum diisi dalam fail index.html!", "error");
-        return;
-      }
-
-      const btn = document.getElementById('btnSaveMaster');
-      btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-lg"></i> MENYIMPAN & MENJANA PANGKALAN DATA IPG 2026...`;
-
-      const payload = {
-        COURSE_CODE: document.getElementById('cfgCourseCode').value.trim(),
-        COURSE_NAME: document.getElementById('cfgCourseName').value.trim(),
-        DEPARTMENT: document.getElementById('cfgDept').value.trim(),
-        ACADEMIC_SESSION: document.getElementById('cfgAcademicSession').value.trim(),
-        SHEET_LINK: document.getElementById('cfgSheetLink').value.trim(),
-        FOLDER_LINK: document.getElementById('cfgFolderLink').value.trim(),
-        TASKS: COURSE_CONFIG.TASKS
-      };
-
-      fetch(API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action: "saveMasterConfig", config: payload })
-      })
-      .then(res => res.json())
-      .then(data => {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up text-lg"></i> SIMPAN & INISIALISASI PANGKALAN DATA GOOGLE SHEETS`;
-
-        if (data.status === "success") {
-          showToast(data.message, "success");
-          COURSE_CONFIG = data.config;
-          renderUIInitializedState();
+async function handleAuth() {
+    const id = document.getElementById('idIn').value.trim(), pw = document.getElementById('pwIn')?document.getElementById('pwIn').value:'';
+    if (!id) return showToast('Sila masukkan Kredensial!', 'error');
+    const isLec = document.getElementById('tl').classList.contains('active');
+    
+    const btn = document.getElementById('loginBtn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Mengesahkan...';
+    try {
+        if(isLec) {
+            const r = await fetch(`${API}?action=lecturerLogin&email=${encodeURIComponent(id)}&pass=${encodeURIComponent(pw)}`); const o = await r.json();
+            if(o.status==='success') { curLecEmail=id; isAdminUser=o.isAdmin; initLecturerDash(o.name); } else showToast(o.message, 'error');
         } else {
-          showToast(data.message || "Gagal menyimpan tetapan", "error");
+            showToast('Portal Pelajar belum diaktifkan dalam demo ini.', 'error'); // Boleh diaktifkan jika mahu
         }
-      })
-      .catch(err => {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up text-lg"></i> SIMPAN & INISIALISASI PANGKALAN DATA GOOGLE SHEETS`;
-        showToast("Ralat Rangkaian / Google Apps Script HTML Response. Pastikan Apps Script di-Deploy sebagai 'Anyone'.", "error");
-      });
-    }
+    } catch(e) { showToast('Ralat pelayan.', 'error'); }
+    btn.disabled=false; btn.innerHTML='Akses Sistem';
+}
 
-    function loadStudentList() {
-      if (!API || API.trim() === "") return;
+async function initLecturerDash(name) {
+    document.getElementById('loginScreen').style.display='none'; document.getElementById('lecturerDash').style.display='flex';
+    document.getElementById('lecName').textContent = name;
+    if(isAdminUser) document.getElementById('adminBadge').style.display='inline-block';
+    
+    try {
+        const r = await fetch(`${API}?action=getLecturerStudents&email=${encodeURIComponent(curLecEmail)}`); const o = await r.json();
+        sData = o.data || [];
+        
+        const classes = [...new Set(sData.map(s=>s.Kelas))].filter(Boolean).sort();
+        document.getElementById('classInfo').textContent = isAdminUser ? `SEMUA KELAS` : classes.join(', ');
+        document.getElementById('classFilter').innerHTML = '<option value="">Semua Kelas</option>' + classes.map(k=>`<option value="${k}">${k}</option>`).join('');
+        
+        filterStudents();
+        renderSummaryTable();
+    } catch(e) { showToast('Gagal muat senarai pelajar.', 'error'); }
+}
 
-      fetch(`${API}?action=getStudents`)
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.status === "success" && data.students) {
-            STUDENT_LIST = data.students;
-          }
-          renderIndukTable();
-        })
-        .catch(err => {
-          console.warn("Gagal memuatkan senarai pelajar:", err);
-          renderIndukTable();
+function filterStudents() {
+    const cls = document.getElementById('classFilter').value, q = document.getElementById('searchStudent').value.toLowerCase();
+    const f = sData.filter(s => (!cls || s.Kelas==cls) && (s.Nama_Pelajar.toLowerCase().includes(q) || s.No_KP.includes(q)));
+    
+    document.getElementById('sList').innerHTML = f.map(s => {
+        const ada = s.markahSediaAda && s.markahSediaAda.total > 0;
+        return `<div class="s-card ${ada?'border-l-indigo-600':''} ${curS&&curS.No_KP==s.No_KP?'selected':''}" onclick="selectStudent('${s.No_KP}')">
+            <div class="font-bold text-xs text-slate-800 truncate">${s.Nama_Pelajar}</div>
+            <div class="text-[10px] text-slate-500 font-mono-score mt-1">${s.No_KP} | ${s.Kelas}</div>
+        </div>`;
+    }).join('') || '<div class="text-xs text-center p-4 text-slate-400">Tiada rekod.</div>';
+}
+
+function selectStudent(kp) {
+    curS = sData.find(s=>s.No_KP==kp); if(!curS) return;
+    filterStudents(); // untuk serlahkan kad
+    
+    // Kemas kini Header Maklumat
+    document.getElementById('ln').textContent = curS.Nama_Pelajar; document.getElementById('lk').textContent = curS.No_KP;
+    document.getElementById('rName').textContent = curS.Nama_Pelajar; document.getElementById('rKP').textContent = curS.No_KP;
+    
+    document.getElementById('gradingEmpty').style.display='none'; document.getElementById('gradingPanel').style.display='block';
+    document.getElementById('rubrikEmpty').style.display='none'; document.getElementById('rubrikPanel').style.display='block';
+    
+    // Isi markah jika ada
+    const m = curS.markahSediaAda;
+    CONFIG.TASKS.forEach((t, tIdx) => {
+        t.hps.forEach((hp, hpIdx) => {
+            const hKey = `HP_${tIdx}_${hpIdx}_${(hp.code||'HP').toUpperCase()}`;
+            const input = document.getElementById(`in_${tIdx}_${hpIdx}`);
+            if(input) input.value = m && m.hps[hKey] ? fmt1(m.hps[hKey]) : '';
         });
+    });
+    if(m) {
+        document.getElementById('justTxt').value = m.justifikasi==='-'?'':m.justifikasi;
+        document.getElementById('rBadge').style.display='inline-flex';
+    } else {
+        document.getElementById('justTxt').value = '';
+        document.getElementById('rBadge').style.display='none';
     }
+    calcDynamicMarking();
+    loadDynamicRubrikData(kp);
+}
 
-    function toggleAddStudentDrawer() {
-      document.getElementById('addStudentDrawer').classList.toggle('hidden');
-    }
+// --- PEMBINA UI DINAMIK ---
+function buildDynamicMarkingPanel() {
+    const cont = document.getElementById('dynamicMarkingContainer');
+    cont.innerHTML = CONFIG.TASKS.map((t, tIdx) => `
+        <div class="border rounded-xl p-5 bg-white border-t-4 shadow-sm hover:shadow transition" style="border-top-color: ${COLORS[tIdx%COLORS.length]}">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <span class="text-xs font-extrabold uppercase text-slate-800">${t.title}</span>
+                <span class="text-[10px] font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-500">${t.weight}%</span>
+            </div>
+            <div class="space-y-4">
+                ${t.hps.map((hp, hpIdx) => `
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold uppercase tracking-wider" style="color:${COLORS[tIdx%COLORS.length]}">${hp.code} <span class="text-[9px] text-slate-400">(/${hp.maxScore})</span></span>
+                        <input type="number" id="in_${tIdx}_${hpIdx}" max="${hp.maxScore}" oninput="calcDynamicMarking()" class="w-20 text-center font-mono-score font-bold text-lg p-1.5 border rounded-lg bg-slate-50 focus:ring-2" style="color:${COLORS[tIdx%COLORS.length]}">
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+}
 
-    function addNewStudentFromUI() {
-      const nama = document.getElementById('newStdNama').value.trim();
-      const noKp = document.getElementById('newStdKp').value.trim();
-      const noGiliran = document.getElementById('newStdGiliran').value.trim();
-      const kelas = document.getElementById('newStdKelas').value.trim();
+function calcDynamicMarking() {
+    let total = 0;
+    CONFIG.TASKS.forEach((t, tIdx) => {
+        t.hps.forEach((hp, hpIdx) => {
+            const input = document.getElementById(`in_${tIdx}_${hpIdx}`);
+            let val = roundTo1(input.value);
+            if(val > hp.maxScore) { val = hp.maxScore; input.value = val; }
+            if(val < 0) { val = 0; input.value = val; }
+            total += val;
+        });
+    });
+    total = roundTo1(total);
+    const gred = calculateGred(total);
+    document.getElementById('tm').textContent = fmt1(total);
+    document.getElementById('gd').textContent = gred;
+    
+    const isAplus = total >= 90;
+    document.getElementById('justArea').style.display = isAplus ? 'block' : 'none';
+    
+    document.getElementById('tm').className = `font-mono-score text-5xl font-black ${total>=80?'text-sky-500':total>=50?'text-amber-500':'text-rose-500'}`;
+    document.getElementById('gd').className = `font-serif-title text-6xl font-bold ${gred.includes('A')?'text-emerald-500':gred.includes('B')?'text-sky-500':gred.includes('C')?'text-amber-500':'text-rose-500'}`;
+}
 
-      if (!nama) { showToast("Sila masukkan nama pelajar!", "error"); return; }
+async function saveManualScores() {
+    if(!curS) return;
+    const btn = document.getElementById('saveManualBtn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Menyimpan...';
+    
+    let total = 0, hpsObj = {};
+    CONFIG.TASKS.forEach((t, tIdx) => {
+        t.hps.forEach((hp, hpIdx) => {
+            const val = roundTo1(document.getElementById(`in_${tIdx}_${hpIdx}`).value);
+            hpsObj[`HP_${tIdx}_${hpIdx}_${(hp.code||'HP').toUpperCase()}`] = val;
+            total += val;
+        });
+    });
+    
+    const just = document.getElementById('justTxt').value.trim();
+    if(total >= 90 && !just) { showToast('Justifikasi Gred A+ Wajib Diisi!', 'error'); btn.disabled=false; btn.innerHTML='SIMPAN MARKAH CALON INI'; return; }
 
-      const newStd = { idSistem: `STD_${Date.now()}`, nama, jantina: "L", noKp, noGiliran, kelas };
+    try {
+        await fetch(API, {method:'POST', mode:'no-cors', body:JSON.stringify({
+            action:"submitScores", noKP:curS.No_KP, hps:hpsObj, justifikasi:just, penilai:curLecEmail
+        })});
+        await new Promise(r=>setTimeout(r,1500));
+        showToast('Markah disimpan!', 'success');
+        refreshData();
+    } catch(e) { showToast('Ralat menyimpan.', 'error'); }
+    btn.disabled=false; btn.innerHTML='<i class="fas fa-save me-2"></i> SIMPAN MARKAH CALON INI';
+}
 
-      fetch(API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action: "saveStudent", student: newStd })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === "success") {
-          showToast(`Pelajar ${nama} berjaya didaftarkan!`, "success");
-          STUDENT_LIST.push(newStd);
-          renderIndukTable();
-          document.getElementById('newStdNama').value = "";
-          document.getElementById('newStdKp').value = "";
-          document.getElementById('newStdGiliran').value = "";
-          toggleAddStudentDrawer();
-        }
-      });
-    }
+function buildDynamicSummaryTable() {
+    let theadHTML = `<tr><th>Nama Calon</th>`;
+    CONFIG.TASKS.forEach(t => t.hps.forEach(hp => { theadHTML += `<th class="text-center">${hp.code} (${hp.maxScore})</th>`; }));
+    theadHTML += `<th class="text-center bg-slate-100">JUM</th><th class="text-center bg-slate-100">GRED</th></tr>`;
+    document.getElementById('summaryHeader').innerHTML = theadHTML;
+}
 
-    function renderIndukTable() {
-      const header = document.getElementById('indukTableHeader');
-      const body = document.getElementById('indukTableBody');
+function renderSummaryTable() {
+    const tbody = document.getElementById('summaryBody');
+    if(!sData.length) { tbody.innerHTML='<tr><td colspan="10" class="text-center p-8 text-slate-400">Tiada rekod.</td></tr>'; return; }
+    
+    tbody.innerHTML = sData.map(s => {
+        const m = s.markahSediaAda;
+        let tr = `<tr class="border-b hover:bg-slate-50"><td class="p-3"><div class="font-bold text-xs text-slate-800">${s.Nama_Pelajar}</div><div class="text-[10px] text-slate-500 font-mono-score">${s.No_KP}</div></td>`;
+        CONFIG.TASKS.forEach((t, tIdx) => t.hps.forEach((hp, hpIdx) => {
+            const hKey = `HP_${tIdx}_${hpIdx}_${(hp.code||'HP').toUpperCase()}`;
+            tr += `<td class="p-3 text-center font-mono-score font-bold text-[11px] text-slate-600">${m && m.hps[hKey]!==undefined ? fmt1(m.hps[hKey]) : '-'}</td>`;
+        }));
+        tr += `<td class="p-3 text-center font-mono-score font-black text-sm bg-slate-50">${m?fmt1(m.total):'-'}</td>
+               <td class="p-3 text-center bg-slate-50"><span class="px-2 py-0.5 rounded text-xs font-bold border ${m?getBadge(m.gred):''}">${m?m.gred:'-'}</span></td></tr>`;
+        return tr;
+    }).join('');
+}
+function getBadge(g) { return g.includes('A')?'bg-green-100 text-green-800':g.includes('B')?'bg-blue-100 text-blue-800':g.includes('C')?'bg-amber-100 text-amber-800':'bg-red-100 text-red-800'; }
 
-      let hpsFlat = [];
-      if (COURSE_CONFIG.TASKS) {
-        COURSE_CONFIG.TASKS.forEach((t, tIdx) => {
-          if (t.hps) {
-            t.hps.forEach((hp, hpIdx) => {
-              hpsFlat.push({
-                taskTitle: t.title,
-                code: (hp.code && hp.code.trim() !== "") ? hp.code.toUpperCase().trim() : `HP_${tIdx+1}_${hpIdx+1}`,
-                maxScore: parseFloat(hp.maxScore) || 0,
-                evaluatorMode: hp.evaluatorMode || "SINGLE"
-              });
+// --- DINAMIK RUBRIK PANELS ---
+async function loadDynamicRubrikData(kp) {
+    let rData = null;
+    try { const res = await fetch(`${API}?action=getRubrikStatus&noKP=${kp}`); const o = await res.json(); if(o.ada) rData = o.data; } catch(e){}
+    
+    const cont = document.getElementById('dynamicRubrikContainer');
+    cont.innerHTML = CONFIG.TASKS.map((t, tIdx) => `
+        <div class="academic-card overflow-hidden mb-6">
+            <div class="bg-slate-100 p-4 border-b font-bold text-sm uppercase text-slate-800 flex justify-between"><span>${t.title}</span></div>
+            ${t.hps.map((hp, hpIdx) => `
+                <div class="p-5 border-b border-dashed">
+                    <h4 class="text-xs font-extrabold text-indigo-700 mb-4 uppercase tracking-widest"><i class="fas fa-list-check me-1"></i> Kriteria Penilaian: ${hp.code} (Max ${hp.maxScore})</h4>
+                    <div class="space-y-2">
+                        ${hp.rubrics.map((r, rIdx) => {
+                            const v = rData ? rData[`R_${tIdx}_${hpIdx}_${rIdx}`]||0 : 0;
+                            return `<div class="flex items-center justify-between p-3 border rounded bg-white shadow-sm">
+                                <span class="text-xs font-bold text-slate-700 w-2/3">${r.nama}</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" id="rub_${tIdx}_${hpIdx}_${rIdx}" max="${r.max}" step="0.1" value="${fmt1(v)}" oninput="calcRubrikLive()" class="w-16 text-center font-mono-score text-sm font-bold border rounded bg-slate-50">
+                                    <span class="text-[10px] text-slate-400 font-bold">/ ${r.max}</span>
+                                </div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                    <div class="mt-4 text-right"><span class="text-[10px] uppercase font-bold text-slate-400 mr-2">Jumlah Kriteria Ini:</span> <span id="rT_${tIdx}_${hpIdx}" class="font-mono-score text-xl font-black text-indigo-900">0.0</span></div>
+                </div>
+            `).join('')}
+        </div>
+    `).join('');
+    calcRubrikLive();
+}
+
+function calcRubrikLive() {
+    CONFIG.TASKS.forEach((t, tIdx) => {
+        t.hps.forEach((hp, hpIdx) => {
+            let sum = 0;
+            hp.rubrics.forEach((r, rIdx) => {
+                const el = document.getElementById(`rub_${tIdx}_${hpIdx}_${rIdx}`);
+                let v = roundTo1(el.value); if(v>r.max) {v=r.max; el.value=v;} if(v<0){v=0; el.value=v;}
+                sum += v;
             });
-          }
+            document.getElementById(`rT_${tIdx}_${hpIdx}`).textContent = fmt1(sum);
+            // Autofill ke Marking Panel jika ada
+            const mInput = document.getElementById(`in_${tIdx}_${hpIdx}`);
+            if(mInput) { mInput.value = fmt1(sum); calcDynamicMarking(); }
         });
-      }
+    });
+}
 
-      // Build Header
-      let thHTML = `
-        <tr class="bg-indigo-950 text-amber-300">
-          <th class="p-3 w-10 text-center">#</th>
-          <th class="p-3 min-w-[180px]">Nama Pelajar</th>
-          <th class="p-3 min-w-[110px]">No. KP</th>
-          <th class="p-3 min-w-[100px]">No. Giliran</th>
-          <th class="p-3 min-w-[80px]">Kelas</th>
-      `;
+async function saveRubrik() {
+    if(!curS) return; const btn=document.getElementById('saveRubrikBtn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Menyimpan...';
+    let dataObj = {};
+    CONFIG.TASKS.forEach((t, tIdx) => t.hps.forEach((hp, hpIdx) => hp.rubrics.forEach((r, rIdx) => {
+        dataObj[`R_${tIdx}_${hpIdx}_${rIdx}`] = Number(document.getElementById(`rub_${tIdx}_${hpIdx}_${rIdx}`).value);
+    })));
+    try {
+        await fetch(API, {method:'POST', mode:'no-cors', body:JSON.stringify({
+            action:"submitRubrik", noKP:curS.No_KP, nama:curS.Nama_Pelajar, kelas:curS.Kelas, penilai:curLecEmail, data:dataObj
+        })});
+        await saveManualScores(); // Simpan juga markah 100%
+    } catch(e) { showToast('Ralat transmisi.', 'error'); btn.disabled=false; btn.innerHTML='CUBA LAGI'; }
+}
 
-      hpsFlat.forEach(hp => {
-        if (hp.evaluatorMode === "DUAL_AVG") {
-          thHTML += `
-            <th class="p-2 text-center bg-indigo-900 border-l border-indigo-800" colspan="3">
-              ${hp.code} (Max ${hp.maxScore})
-              <div class="text-[9px] text-amber-200 flex justify-around mt-1">
-                <span>P1</span><span>P2</span><span>Purata</span>
-              </div>
-            </th>
-          `;
-        } else {
-          thHTML += `<th class="p-3 text-center bg-indigo-900 border-l border-indigo-800">${hp.code} (${hp.maxScore})</th>`;
-        }
-      });
+async function refreshData() {
+    try { const r = await fetch(`${API}?action=getLecturerStudents&email=${encodeURIComponent(curLecEmail)}`); const o=await r.json(); sData=o.data; renderSummaryTable(); filterStudents(); } catch(e){}
+}
 
-      thHTML += `
-          <th class="p-3 text-center bg-amber-600 text-indigo-950 font-black">Jumlah 100%</th>
-          <th class="p-3 text-center bg-amber-600 text-indigo-950 font-black">Gred</th>
-          <th class="p-3 text-center bg-indigo-900">Skala Prestasi</th>
-        </tr>
-      `;
-      header.innerHTML = thHTML;
+function showLecTab(id) {
+    ['marking','rubrik','summary','laporan'].forEach(i => document.getElementById('ltab-'+i).style.display='none');
+    document.getElementById('ltab-'+id).style.display='block';
+    document.querySelectorAll('#lecturerDash .tab').forEach(b => b.classList.toggle('active', b.getAttribute('onclick').includes(id)));
+}
 
-      // Build Rows
-      body.innerHTML = "";
-      if (STUDENT_LIST.length === 0) {
-        body.innerHTML = `<tr><td colspan="20" class="text-center py-8 text-slate-400 font-medium">Tiada rekod pelajar lagi. Klik "+ Tambah Pelajar" di atas untuk bermula.</td></tr>`;
-        return;
-      }
-
-      STUDENT_LIST.forEach((std, sIdx) => {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-amber-50/50 transition";
-
-        let tdHTML = `
-          <td class="p-3 text-center font-bold text-slate-400">${sIdx+1}</td>
-          <td class="p-3 font-bold text-indigo-950">${std.nama}</td>
-          <td class="p-3 text-slate-600 font-mono">${std.noKp}</td>
-          <td class="p-3 text-slate-600 font-mono">${std.noGiliran}</td>
-          <td class="p-3 text-slate-600 font-semibold">${std.kelas}</td>
-        `;
-
-        let totalScoreSum = 0;
-        let totalMaxSum = 0;
-
-        hpsFlat.forEach((hp, hIdx) => {
-          totalMaxSum += hp.maxScore;
-
-          if (hp.evaluatorMode === "DUAL_AVG") {
-            const valP1 = MARKS_CACHE[`${std.idSistem}_${hIdx}_p1`] || 0;
-            const valP2 = MARKS_CACHE[`${std.idSistem}_${hIdx}_p2`] || 0;
-            const avg = ((parseFloat(valP1) + parseFloat(valP2)) / 2) || 0;
-            totalScoreSum += avg;
-
-            tdHTML += `
-              <td class="p-1 border-l border-slate-200"><input type="number" step="0.1" value="${valP1 || ''}" onchange="updateMarkLive('${std.idSistem}', ${hIdx}, 'p1', this.value)" class="w-12 p-1 text-center font-bold border rounded bg-slate-50"></td>
-              <td class="p-1"><input type="number" step="0.1" value="${valP2 || ''}" onchange="updateMarkLive('${std.idSistem}', ${hIdx}, 'p2', this.value)" class="w-12 p-1 text-center font-bold border rounded bg-slate-50"></td>
-              <td class="p-2 text-center font-black text-indigo-900 bg-indigo-50/50" id="avg_${std.idSistem}_${hIdx}">${avg.toFixed(1)}</td>
-            `;
-          } else {
-            const valS = MARKS_CACHE[`${std.idSistem}_${hIdx}_s`] || 0;
-            totalScoreSum += parseFloat(valS) || 0;
-
-            tdHTML += `
-              <td class="p-1 border-l border-slate-200"><input type="number" step="0.1" value="${valS || ''}" onchange="updateMarkLive('${std.idSistem}', ${hIdx}, 's', this.value)" class="w-16 p-1.5 text-center font-bold border rounded bg-slate-50"></td>
-            `;
-          }
-        });
-
-        const pct100 = totalMaxSum > 0 ? ((totalScoreSum / totalMaxSum) * 100) : 0;
-        const gradeObj = calculateIPGGradeUI(pct100);
-
-        tdHTML += `
-          <td class="p-3 text-center font-black text-indigo-950 text-sm bg-amber-100" id="tot_${std.idSistem}">${pct100.toFixed(1)}</td>
-          <td class="p-3 text-center font-black text-xs" id="grd_${std.idSistem}"><span class="px-2 py-0.5 rounded ${gradeObj.badgeClass}">${gradeObj.gred}</span></td>
-          <td class="p-3 text-center text-xs font-semibold text-slate-600" id="skl_${std.idSistem}">${gradeObj.skala}</td>
-        `;
-
-        tr.innerHTML = tdHTML;
-        body.appendChild(tr);
-      });
-    }
-
-    function updateMarkLive(stdId, hIdx, type, val) {
-      MARKS_CACHE[`${stdId}_${hIdx}_${type}`] = parseFloat(val) || 0;
-      renderIndukTable();
-    }
-
-    function calculateIPGGradeUI(m) {
-      if (m >= 90.0) return { gred: "A+", skala: "Amat Cemerlang", badgeClass: "bg-emerald-600 text-white" };
-      if (m >= 80.0) return { gred: "A", skala: "Amat Cemerlang", badgeClass: "bg-emerald-500 text-white" };
-      if (m >= 75.0) return { gred: "A-", skala: "Cemerlang", badgeClass: "bg-blue-600 text-white" };
-      if (m >= 70.0) return { gred: "B+", skala: "Cemerlang", badgeClass: "bg-blue-500 text-white" };
-      if (m >= 65.0) return { gred: "B", skala: "Kepujian", badgeClass: "bg-sky-500 text-white" };
-      if (m >= 60.0) return { gred: "B-", skala: "Kepujian", badgeClass: "bg-amber-500 text-white" };
-      if (m >= 55.0) return { gred: "C+", skala: "Sederhana", badgeClass: "bg-amber-600 text-white" };
-      if (m >= 50.0) return { gred: "C", skala: "Sederhana", badgeClass: "bg-orange-500 text-white" };
-      return { gred: "F", skala: "Lemah / Gagal", badgeClass: "bg-rose-600 text-white" };
-    }
-
-    function saveAllMarksToCloud() {
-      if (!API || API.trim() === "") return;
-
-      const btn = document.getElementById('btnSaveMarks');
-      btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...`;
-
-      let payloadMarks = [];
-      STUDENT_LIST.forEach(std => {
-        let scores = [];
-        let totalScore = 0;
-        let totalMax = 0;
-
-        if (COURSE_CONFIG.TASKS) {
-          let hIdx = 0;
-          COURSE_CONFIG.TASKS.forEach(t => {
-            if (t.hps) {
-              t.hps.forEach(hp => {
-                const maxS = parseFloat(hp.maxScore) || 0;
-                totalMax += maxS;
-
-                if (hp.evaluatorMode === "DUAL_AVG") {
-                  const p1 = MARKS_CACHE[`${std.idSistem}_${hIdx}_p1`] || 0;
-                  const p2 = MARKS_CACHE[`${std.idSistem}_${hIdx}_p2`] || 0;
-                  const avg = (parseFloat(p1) + parseFloat(p2)) / 2;
-                  scores.push(p1, p2, avg.toFixed(1));
-                  totalScore += avg;
-                } else {
-                  const s = MARKS_CACHE[`${std.idSistem}_${hIdx}_s`] || 0;
-                  scores.push(s);
-                  totalScore += parseFloat(s) || 0;
-                }
-                hIdx++;
-              });
-            }
-          });
-        }
-
-        const pct = totalMax > 0 ? (totalScore / totalMax) * 100 : 0;
-        payloadMarks.push({
-          idSistem: std.idSistem,
-          nama: std.nama,
-          jantina: std.jantina,
-          noKp: std.noKp,
-          noGiliran: std.noGiliran,
-          kelas: std.kelas,
-          scores: scores,
-          total100: pct.toFixed(1)
-        });
-      });
-
-      fetch(API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action: "saveMarks", marks: payloadMarks })
-      })
-      .then(res => res.json())
-      .then(data => {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-floppy-disk text-sm"></i> Simpan Markah Ke Cloud`;
-        if (data.status === "success") {
-          showToast(data.message, "success");
-        } else {
-          showToast(data.message || "Gagal menyimpan markah", "error");
-        }
-      })
-      .catch(err => {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-floppy-disk text-sm"></i> Simpan Markah Ke Cloud`;
-        showToast("Ralat Rangkaian: " + err.toString(), "error");
-      });
-    }
-
-    function switchMainTab(tab) {
-      ['tabSetup', 'tabInduk', 'tabRubrik', 'tabModerasi'].forEach(tId => {
-        const sec = document.getElementById(tId);
-        if (sec) sec.classList.add('hidden');
-      });
-
-      const navMap = { 'setup': 'btnTabSetup', 'induk': 'btnTabInduk', 'rubrik': 'btnTabRubrik', 'moderasi': 'btnTabModerasi' };
-
-      Object.keys(navMap).forEach(key => {
-        const btn = document.getElementById(navMap[key]);
-        if (btn) btn.className = "px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition bg-indigo-900/50 hover:bg-indigo-800 text-indigo-200";
-      });
-
-      if (tab === 'setup') {
-        document.getElementById('tabSetup').classList.remove('hidden');
-        document.getElementById('btnTabSetup').className = "px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition bg-amber-500 text-indigo-950 shadow hover:bg-amber-400";
-      } else if (tab === 'induk') {
-        document.getElementById('tabInduk').classList.remove('hidden');
-        document.getElementById('btnTabInduk').className = "px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition bg-amber-500 text-indigo-950 shadow hover:bg-amber-400";
-      } else if (tab === 'rubrik') {
-        document.getElementById('tabRubrik').classList.remove('hidden');
-        document.getElementById('btnTabRubrik').className = "px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition bg-amber-500 text-indigo-950 shadow hover:bg-amber-400";
-      } else if (tab === 'moderasi') {
-        document.getElementById('tabModerasi').classList.remove('hidden');
-        document.getElementById('btnTabModerasi').className = "px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition bg-amber-500 text-indigo-950 shadow hover:bg-amber-400";
-      }
-    }
-
-    function showToast(msg, type = "info") {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      const bgColor = type === 'success' ? 'bg-emerald-900 border-emerald-500 text-white' : 'bg-rose-900 border-rose-500 text-white';
-      const icon = type === 'success' ? 'fa-circle-check text-emerald-400' : 'fa-triangle-exclamation text-rose-400';
-
-      toast.className = `p-4 rounded-xl border shadow-xl flex items-start gap-3 transition transform duration-300 translate-y-2 ${bgColor}`;
-      toast.innerHTML = `
-        <i class="fa-solid ${icon} text-lg mt-0.5"></i>
-        <div class="flex-1 text-xs font-semibold leading-relaxed">${msg}</div>
-        <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      `;
-
-      container.appendChild(toast);
-      setTimeout(() => { if (toast.parentNode) toast.remove(); }, 6000);
-    }
-  </script>
+function logout() { location.reload(); }
+</script>
 </body>
 </html>
