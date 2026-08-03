@@ -3,361 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Pemarkahan Akademik</title>
+    <title>Master Portal Pemarkahan IPG (Templat Induk)</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 0; }
-        .academic-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-        .btn-primary { background: #1e3a8a; color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
-        .btn-primary:hover { background: #1e40af; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .input-field { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; transition: all 0.2s; }
-        .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-        .label-dim { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; display: block; }
+        :root {
+            --primary: #1e3a8a;    
+            --primary-hover: #1e40af;
+            --secondary: #9f1239;  
+            --bg-body: #f8fafc;    
+            --bg-surface: #ffffff; 
+            --bg-alt: #f1f5f9;     
+            --text-main: #0f172a;  
+            --text-muted: #64748b; 
+            --border: #e2e8f0;     
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-body); min-height: 100vh; color: var(--text-main); }
+        .font-serif-title { font-family: 'Lora', serif; }
+        .font-mono-score { font-family: 'Space Mono', monospace; }
+        .shell { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 1.5rem; }
+        .academic-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 1rem; box-shadow: var(--shadow-sm); }
         
-        .disclaimer-bar { background: #1e293b; color: #f8fafc; padding: 10px 24px; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 12px; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid #facc15; }
+        .btn-primary { background: var(--primary); border: 1px solid var(--primary); cursor: pointer; transition: all 0.2s; color: white; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+        .btn-primary:disabled { background: #94a3b8; border-color: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
         
-        #toast { position: fixed; top: 20px; right: 20px; z-index: 9999; transform: translateX(150%); transition: transform 0.3s; background: white; padding: 16px 20px; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-left: 4px solid #10b981; font-weight: 600; display: flex; gap: 10px; align-items: center; }
+        input[type=number], input[type=text], input[type=password], textarea, select { background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-main); outline: none; transition: all 0.2s; border-radius: 0.5rem; padding: 0.75rem 1rem; width: 100%; font-family: 'Plus Jakarta Sans', sans-serif; }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1); }
+        
+        .dim-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px; display: block; }
+        
+        .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Wizard specific styles */
+        .wizard-step { border-left: 4px solid var(--primary); padding-left: 1.5rem; margin-bottom: 2rem; position: relative; }
+        .wizard-step::before { content: attr(data-step); position: absolute; left: -14px; top: 0; background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
+        
+        #toast { position: fixed; top: 24px; right: 24px; z-index: 9999; transform: translateX(120%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         #toast.show { transform: translateX(0); }
-        
-        /* Spinner */
-        .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid white; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<!-- TOP HEADER BAR (DINAMIK) -->
-<div class="disclaimer-bar" id="globalDisclaimer">
-    <i class="fas fa-landmark text-yellow-400"></i>
-    <span>
-        <strong>SISTEM MAKLUMAT SULIT & TERHAD</strong> 
-        <span class="opacity-50 mx-2">|</span> Kegunaan Rasmi <strong id="lblDept">Memuatkan...</strong>
-        <span class="opacity-50 mx-2">|</span> Kod Kursus: <strong id="lblCourse" class="text-yellow-400">...</strong>
-    </span>
+<div id="toast">
+    <div class="academic-card px-5 py-4 flex items-center gap-3 text-sm font-bold shadow-lg border-l-4 border-amber-500" id="toastMsg"></div>
 </div>
 
-<div id="toast"><i class="fas fa-check-circle text-green-500"></i> <span id="toastMsg"></span></div>
-
-<!-- ========================================== -->
-<!-- 1. SETUP WIZARD (DIPAPARKAN JIKA KOSONG)   -->
-<!-- ========================================== -->
-<div id="setupWizard" class="max-w-4xl mx-auto mt-10 p-6 hidden">
-    <div class="academic-card overflow-hidden">
-        <div class="bg-indigo-900 text-white p-6 flex items-center gap-4">
-            <i class="fas fa-cogs text-3xl text-indigo-300"></i>
-            <div>
-                <h1 class="text-2xl font-bold">Panel Tetapan Master Portal</h1>
-                <p class="text-indigo-200 text-sm mt-1">Sila tentukan maklumat kursus, pautan Google Drive, dan struktur HPP dari tapak bersih.</p>
-            </div>
-        </div>
+<div class="shell" style="align-items: flex-start; padding-top: 3rem;">
+    <!-- SETUP WIZARD (Visible by default in Master Template) -->
+    <div id="setupWizard" class="w-full max-w-4xl" style="display: block;">
         
-        <div class="p-8 space-y-8 bg-slate-50">
-            <!-- A. Maklumat Kursus -->
-            <div>
-                <h2 class="text-sm font-extrabold text-indigo-800 uppercase tracking-wider mb-4 border-b-2 border-indigo-100 pb-2">A. Maklumat Asas Kursus</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label class="label-dim">KOD KURSUS</label><input type="text" id="cfg_courseCode" class="input-field" placeholder="Cth: MPU3421"></div>
-                    <div><label class="label-dim">NAMA KURSUS</label><input type="text" id="cfg_courseName" class="input-field" placeholder="Cth: PERMAINAN"></div>
-                    <div><label class="label-dim">JABATAN / UNIT</label><input type="text" id="cfg_dept" class="input-field" placeholder="Cth: Unit Kokurikulum"></div>
-                    <div><label class="label-dim">SESI AKADEMIK & AMBILAN</label><input type="text" id="cfg_session" class="input-field" placeholder="Cth: Ambilan Ogos 2026"></div>
-                </div>
-            </div>
-
-            <!-- B. Pautan Storan -->
-            <div>
-                <h2 class="text-sm font-extrabold text-indigo-800 uppercase tracking-wider mb-4 border-b-2 border-indigo-100 pb-2">B. Pautan Storan Google Workspace</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="academic-card overflow-hidden shadow-2xl mb-8">
+            <div class="bg-indigo-900 text-white p-8">
+                <div class="flex items-center gap-4 mb-2">
+                    <i class="fas fa-cogs text-3xl text-amber-400"></i>
                     <div>
-                        <label class="label-dim">PAUTAN GOOGLE SHEET (DATABASE)</label>
-                        <input type="text" id="cfg_sheetLink" class="input-field border-green-300 bg-green-50" placeholder="https://docs.google.com/spreadsheets/d/.../edit">
-                    </div>
-                    <div>
-                        <label class="label-dim">PAUTAN GOOGLE DRIVE (FOLDER GAMBAR)</label>
-                        <input type="text" id="cfg_folderLink" class="input-field border-amber-300 bg-amber-50" placeholder="https://drive.google.com/drive/folders/...">
+                        <h1 class="font-serif-title text-2xl font-bold">Panel Tetapan Master Portal IPG</h1>
+                        <p class="text-indigo-200 text-sm mt-1">Sila tentukan maklumat kursus, pautan Google Drive, dan struktur HPP dari tapak bersih.</p>
                     </div>
                 </div>
-            </div>
-
-            <!-- C. Struktur Tugasan -->
-            <div>
-                <div class="flex justify-between items-end mb-4 border-b-2 border-indigo-100 pb-2">
-                    <h2 class="text-sm font-extrabold text-indigo-800 uppercase tracking-wider">C. Pembina Tugasan, HPP & Kriteria Rubrik</h2>
-                    <button onclick="addTask()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded font-bold"><i class="fas fa-plus me-1"></i> Tambah Tugasan</button>
-                </div>
-                <div id="tasksContainer" class="space-y-4"></div>
             </div>
             
-            <div class="pt-4">
-                <button onclick="saveSetup()" id="btnSaveSetup" class="btn-primary w-full py-4 text-lg bg-orange-600 hover:bg-orange-700 shadow-lg border-b-4 border-orange-800"><i class="fas fa-rocket me-2"></i> SIMPAN & INISIALISASI PANGKALAN DATA</button>
-            </div>
-        </div>
-    </div>
-</div>
+            <div class="p-8">
+                <!-- AMARAN TEMPLAT -->
+                <div class="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-lg mb-8 text-sm flex gap-3 shadow-sm">
+                    <i class="fas fa-exclamation-triangle text-xl mt-0.5"></i>
+                    <div>
+                        <strong class="block mb-1">PERHATIAN: Ini Adalah Repositori Templat (Master Portal)</strong>
+                        Pastikan anda telah memasukkan <strong>URL Web App Apps Script</strong> bagi subjek khusus ke dalam pembolehubah <code>const API = "..."</code> di dalam fail <code>index.html</code> ini sebelum menekan butang Simpan. Jika API dibiarkan kosong, tetapan tidak akan dapat disimpan.
+                    </div>
+                </div>
 
-<!-- ========================================== -->
-<!-- 2. LOGIN SCREEN (DIPAPARKAN JIKA LENGKAP)  -->
-<!-- ========================================== -->
-<div id="loginScreen" class="min-h-[90vh] flex items-center justify-center p-4 hidden">
-    <div class="academic-card w-full max-w-md p-8 border-t-4 border-indigo-700">
-        <div class="text-center mb-8">
-            <i class="fas fa-university text-5xl text-indigo-800 mb-4"></i>
-            <div class="text-xs font-extrabold tracking-widest text-slate-500 uppercase mb-2">Institut Pendidikan Guru</div>
-            <h1 class="text-2xl font-bold text-slate-800">Portal Pemarkahan</h1>
-            <p id="lblCourseNameLogin" class="text-sm text-indigo-600 font-semibold mt-1">Memuatkan data kursus...</p>
+                <div class="wizard-step" data-step="1">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 mb-4">Maklumat Asas Kursus</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="dim-label">Kod Kursus</label>
+                            <input type="text" id="wizCode" placeholder="Cth: MPU3421" class="font-mono-score font-bold">
+                        </div>
+                        <div>
+                            <label class="dim-label">Nama Kursus</label>
+                            <input type="text" id="wizName" placeholder="Cth: PERMAINAN" class="font-bold">
+                        </div>
+                        <div>
+                            <label class="dim-label">Jabatan / Unit</label>
+                            <input type="text" id="wizDept" placeholder="Cth: Unit Kokurikulum">
+                        </div>
+                        <div>
+                            <label class="dim-label">Sesi Akademik & Ambilan</label>
+                            <input type="text" id="wizSession" placeholder="Cth: Ambilan Ogos 2026">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wizard-step" data-step="2">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 mb-4">Pautan Storan Google Workspace</h3>
+                    <p class="text-xs text-slate-500 mb-4">Pastikan akaun Google yang digunakan mempunyai kebenaran Editor.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="dim-label">ID / Pautan Google Sheet (Pangkalan Data)</label>
+                            <input type="text" id="wizSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/...">
+                        </div>
+                        <div>
+                            <label class="dim-label">ID / Pautan Folder Gambar Drive</label>
+                            <input type="text" id="wizFolderUrl" placeholder="https://drive.google.com/drive/folders/...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wizard-step" data-step="3" style="border-left-color:transparent;">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 mb-4">Pembina Struktur Tugasan & HPP</h3>
+                    
+                    <div id="taskBuilderArea" class="space-y-6">
+                        <!-- Task blocks will be appended here dynamically -->
+                        <div class="p-6 bg-slate-50 border border-slate-200 rounded-lg text-center text-sm text-slate-500">
+                            Fungsi Pembina Visual belum diaktifkan dalam paparan ringkas templat. Semua pembinaan lajur di Google Sheet akan mengikut konfigurasi statik apabila API disambungkan.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-slate-200">
+                    <button onclick="saveSetupConfig()" id="btnSaveWizard" class="btn-primary w-full py-4 rounded-lg text-sm bg-amber-600 border-amber-600 hover:bg-amber-700">
+                        <i class="fas fa-database me-2"></i> SIMPAN & INISIALISASI PANGKALAN DATA (APPS SCRIPT)
+                    </button>
+                </div>
+            </div>
         </div>
         
-        <div class="flex bg-slate-100 p-1 rounded-lg mb-6">
-            <button id="tabStudent" onclick="switchLogin('student')" class="flex-1 py-2 text-sm font-bold rounded bg-white text-indigo-700 shadow-sm transition">Ruang Pelajar</button>
-            <button id="tabLecturer" onclick="switchLogin('lecturer')" class="flex-1 py-2 text-sm font-bold rounded text-slate-500 hover:text-slate-800 transition">Ruang Pensyarah</button>
-        </div>
-
-        <div class="space-y-4 mb-6">
-            <div>
-                <label class="label-dim">Kredensial Log Masuk</label>
-                <input type="text" id="loginId" class="input-field text-center font-mono text-lg font-bold" placeholder="No. Kad Pengenalan / Emel">
-            </div>
-            <div id="loginPassWrapper" class="hidden">
-                <input type="password" id="loginPass" class="input-field text-center font-mono text-lg" placeholder="Kata Laluan Pensyarah">
-            </div>
-        </div>
-
-        <button onclick="doLogin()" id="btnLogin" class="btn-primary w-full py-3 text-sm"><i class="fas fa-sign-in-alt me-2"></i> AKSES SISTEM</button>
     </div>
-</div>
 
-<!-- ========================================== -->
-<!-- 3. DASHBOARD PENSYARAH / PELAJAR MOCK      -->
-<!-- ========================================== -->
-<div id="mainDashboard" class="hidden max-w-6xl mx-auto p-6 mt-6">
-    <div class="academic-card p-12 text-center border-dashed border-2 bg-slate-50">
-        <i class="fas fa-check-circle text-6xl text-emerald-500 mb-4"></i>
-        <h2 class="text-2xl font-bold text-slate-800">Berjaya Log Masuk!</h2>
-        <p class="text-slate-500 mt-2 mb-6">Pangkalan data telah diinisialisasi dan sedia untuk beroperasi sepenuhnya.</p>
-        <button onclick="logout()" class="btn-primary bg-slate-600 hover:bg-slate-700">Log Keluar</button>
+    <!-- MAIN OPERATIONAL DASHBOARD (Hidden in Master Template) -->
+    <div id="mainDashboard" style="display:none; width:100%;">
+        <div class="academic-card p-12 text-center max-w-md mx-auto mt-20">
+            <i class="fas fa-check-circle text-5xl text-green-500 mb-4"></i>
+            <h2 class="font-serif-title text-2xl font-bold text-slate-800 mb-2">Portal Sudah Diinisialisasi</h2>
+            <p class="text-slate-600 text-sm">Pangkalan data dan struktur telah ditetapkan. Laman ini adalah laman templat. Sila buka fail <code>index.html</code> bagi subjek rasmi anda untuk mula memasuk markah.</p>
+        </div>
     </div>
 </div>
 
 <script>
-// ==========================================
-// KONFIGURASI API DAN SISTEM
-// ==========================================
-// GANTIKAN URL API INI DENGAN URL WEB APP ANDA
-const API = "";
+// ============================================================================
+// KAWALAN API MASTER PORTAL
+// ============================================================================
+// BIARKAN KOSONG UNTUK MENGEKALKAN IA SEBAGAI TEMPLAT BERSIH.
+// Apabila anda menyalin fail ini untuk subjek baharu, masukkan URL Web App di sini.
+const API = ""; 
+// ============================================================================
 
-let CONFIG = null;
-let currentLoginMode = 'student';
-
-// UTILITIES
-function showToast(msg, type='success') {
-    const t = document.getElementById('toast');
-    document.getElementById('toastMsg').textContent = msg;
-    t.style.borderLeftColor = type === 'success' ? '#10b981' : '#f59e0b';
-    t.querySelector('i').className = type === 'success' ? 'fas fa-check-circle text-green-500' : 'fas fa-exclamation-triangle text-amber-500';
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
+function showToast(msg) { 
+    const t = document.getElementById('toast'), m = document.getElementById('toastMsg'); 
+    if(!t || !m) return;
+    m.innerHTML = `<i class="fas fa-info-circle text-lg"></i><span class="text-slate-700">${msg}</span>`; 
+    t.classList.add('show'); 
+    setTimeout(() => t.classList.remove('show'), 3000); 
 }
 
-function switchLogin(mode) {
-    currentLoginMode = mode;
-    document.getElementById('tabStudent').className = mode === 'student' ? 'flex-1 py-2 text-sm font-bold rounded bg-white text-indigo-700 shadow-sm transition' : 'flex-1 py-2 text-sm font-bold rounded text-slate-500 hover:text-slate-800 transition';
-    document.getElementById('tabLecturer').className = mode === 'lecturer' ? 'flex-1 py-2 text-sm font-bold rounded bg-white text-indigo-700 shadow-sm transition' : 'flex-1 py-2 text-sm font-bold rounded text-slate-500 hover:text-slate-800 transition';
-    document.getElementById('loginPassWrapper').style.display = mode === 'student' ? 'none' : 'block';
-}
+window.onload = async () => {
+    // 1. Jika API kosong, ini bermakna kita berada di MASTERPORTAL.
+    // Paparkan Setup Wizard sebagai panduan visual sahaja.
+    if (!API || API.trim() === "") {
+        document.getElementById('setupWizard').style.display = 'block';
+        document.getElementById('mainDashboard').style.display = 'none';
+        return;
+    }
 
-function logout() {
-    localStorage.clear();
-    location.reload();
-}
-
-// ==========================================
-// INITIALIZATION KETIKA PAGE LOAD
-// ==========================================
-window.onload = async () => { 
+    // 2. Jika API ada isinya (anda telah salin fail ini ke repo subjek baharu)
     try {
-        const r = await fetch(`${API}?action=getCourseConfig`); 
+        const r = await fetch(`${API}?action=getCourseConfig`);
         const o = await r.json();
         
-        if (o.status === 'success' && o.config && o.config.IS_INITIALIZED) {
-            CONFIG = o.config;
-            
-            // 1. SUNTIK NAMA KURSUS DINAMIK KE DALAM UI (HEADER & LOGIN)
-            document.getElementById('lblCourse').textContent = CONFIG.COURSE_CODE || "TIADA KOD";
-            document.getElementById('lblDept').textContent = CONFIG.DEPARTMENT || "Unit Akademik";
-            document.getElementById('lblCourseNameLogin').textContent = `${CONFIG.COURSE_CODE} — ${CONFIG.COURSE_NAME}`;
-            document.title = `${CONFIG.COURSE_CODE} | Portal Pemarkahan IPG`;
-            
-            // 2. PAPAR LOGIN SCREEN, SEMBUNYI WIZARD
+        if (o.status === "success" && o.config && o.config.IS_INITIALIZED) {
+            // Jika Apps Script mengesahkan pangkalan data subjek sudah diinisialisasi
             document.getElementById('setupWizard').style.display = 'none';
-            document.getElementById('loginScreen').style.display = 'flex';
-            
-            // 3. SEMAK SESI LAMA
-            const u = localStorage.getItem('user'); 
-            if(u) showDashboard(); 
-            
+            // Dalam portal sebenar, di sini kita akan panggil fungsi pemaparan Login Screen.
+            // Memandangkan ini fail Master, kita tunjukkan notis berjaya.
+            document.getElementById('mainDashboard').style.display = 'block';
         } else {
-            // JIKA BELUM INIT, PAPAR SETUP WIZARD BERSIH
+            // Jika belum diinisialisasi, paparkan Setup Wizard untuk subjek ini.
             document.getElementById('setupWizard').style.display = 'block';
-            document.getElementById('loginScreen').style.display = 'none';
-            addTask(); // Tambah 1 tugasan kosong lalai
+            document.getElementById('mainDashboard').style.display = 'none';
         }
-    } catch(e) {
-        console.error(e);
-        document.getElementById('lblCourseNameLogin').textContent = "Ralat pelayan. Sila semak pautan API.";
-        document.getElementById('loginScreen').style.display = 'flex';
+    } catch (e) {
+        document.getElementById('setupWizard').style.display = 'block';
+        showToast("Gagal menyambung ke Apps Script. Sila semak pautan API anda.");
     }
 };
 
-// ==========================================
-// LOGIN LOGIC
-// ==========================================
-async function doLogin() {
-    const id = document.getElementById('loginId').value.trim();
-    if(!id) return showToast('Sila isi maklumat login', 'warn');
-    
-    const btn = document.getElementById('btnLogin');
-    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Mengesahkan...';
-    
-    // Simulasi Login (Untuk tujuan templat ini, kita bypass auth sebenar jika setup berjaya)
-    setTimeout(() => {
-        localStorage.setItem('user', id);
-        showDashboard();
-        btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i> AKSES SISTEM';
-    }, 1000);
-}
+async function saveSetupConfig() {
+    if (!API || API.trim() === "") {
+        alert("RALAT KRITIKAL: Anda tidak boleh menyimpan tetapan melalui MASTER PORTAL. Sila salin fail index.html ini ke dalam repositori GitHub subjek anda, isikan pembolehubah 'const API', dan buat tetapan di sana.");
+        return;
+    }
 
-function showDashboard() {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainDashboard').style.display = 'block';
-}
+    const code = document.getElementById('wizCode').value;
+    const name = document.getElementById('wizName').value;
+    const sheetUrl = document.getElementById('wizSheetUrl').value;
 
-// ==========================================
-// SETUP WIZARD LOGIC (BUILDER DINAMIK)
-// ==========================================
-let tasksData = [];
+    if (!code || !name || !sheetUrl) {
+        showToast("Sila isikan Kod Kursus, Nama Kursus, dan Pautan Google Sheet!");
+        return;
+    }
 
-function addTask() {
-    const tIdx = tasksData.length;
-    tasksData.push({ title: "", weight: 0, hps: [{ code: "", title: "", mode: "SINGLE", maxScore: 0, rubrics: [{ name: "", desc: "", max: 0 }] }] });
-    renderSetupUI();
-}
+    const btn = document.getElementById('btnSaveWizard');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Menghubungkan Pangkalan Data...';
 
-function addHP(tIdx) {
-    tasksData[tIdx].hps.push({ code: "", title: "", mode: "SINGLE", maxScore: 0, rubrics: [{ name: "", desc: "", max: 0 }] });
-    renderSetupUI();
-}
-
-function addRubric(tIdx, hpIdx) {
-    tasksData[tIdx].hps[hpIdx].rubrics.push({ name: "", desc: "", max: 0 });
-    renderSetupUI();
-}
-
-function updateData(keys, val) {
-    let ref = tasksData;
-    for(let i=0; i<keys.length-1; i++) ref = ref[keys[i]];
-    ref[keys[keys.length-1]] = val;
-}
-
-function renderSetupUI() {
-    const container = document.getElementById('tasksContainer');
-    container.innerHTML = tasksData.map((t, tIdx) => `
-        <div class="border-2 border-slate-200 rounded-lg p-5 bg-white relative mt-6">
-            <div class="absolute -top-3 left-4 bg-slate-800 text-white text-xs font-bold px-3 py-1 rounded-full shadow">TUGASAN ${tIdx+1}</div>
-            
-            <div class="flex gap-4 items-center mb-6 mt-2">
-                <input type="text" value="${t.title}" oninput="updateData([${tIdx},'title'], this.value)" class="input-field flex-1 font-bold" placeholder="Tajuk Tugasan (cth: Ujian Amali)">
-                <div class="flex items-center gap-2 w-32">
-                    <label class="text-xs font-bold text-slate-500">WAJARAN</label>
-                    <input type="number" value="${t.weight}" oninput="updateData([${tIdx},'weight'], Number(this.value))" class="input-field text-center font-bold" placeholder="%">
-                </div>
-            </div>
-
-            <div class="space-y-4">
-                ${t.hps.map((hp, hpIdx) => `
-                    <div class="border border-indigo-100 bg-indigo-50/30 rounded-lg p-4">
-                        <div class="flex flex-wrap items-center justify-between mb-3 pb-3 border-b border-indigo-100 gap-3">
-                            <div class="flex gap-2 flex-1 min-w-[250px]">
-                                <input type="text" value="${hp.code}" oninput="updateData([${tIdx},'hps',${hpIdx},'code'], this.value)" class="input-field w-24 font-mono font-bold text-indigo-700 bg-white" placeholder="KOD HPP">
-                                <input type="text" value="${hp.title}" oninput="updateData([${tIdx},'hps',${hpIdx},'title'], this.value)" class="input-field flex-1 font-bold bg-white" placeholder="Tajuk HPP / Hasil Pembelajaran">
-                            </div>
-                            <div class="flex gap-2 items-center w-full md:w-auto">
-                                <select onchange="updateData([${tIdx},'hps',${hpIdx},'mode'], this.value)" class="input-field text-xs font-bold w-auto bg-white">
-                                    <option value="SINGLE" ${hp.mode==='SINGLE'?'selected':''}>Penilai Tunggal (SINGLE)</option>
-                                    <option value="DUAL_AVG" ${hp.mode==='DUAL_AVG'?'selected':''}>Dwi-Penilai / Moderasi Purata</option>
-                                </select>
-                                <div class="flex items-center gap-1 w-24">
-                                    <span class="text-[10px] font-bold text-slate-400 leading-tight">MAX<br>MARKAH</span>
-                                    <input type="number" value="${hp.maxScore}" oninput="updateData([${tIdx},'hps',${hpIdx},'maxScore'], Number(this.value))" class="input-field text-center text-red-600 font-bold bg-white px-1">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <h4 class="text-xs font-bold text-slate-500"><i class="fas fa-list-ol me-1"></i> KRITERIA RUBRIK</h4>
-                                <button onclick="addRubric(${tIdx}, ${hpIdx})" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold"><i class="fas fa-plus"></i> Tambah Kriteria</button>
-                            </div>
-                            <div class="space-y-2">
-                                ${hp.rubrics.map((r, rIdx) => `
-                                    <div class="flex gap-2 items-center">
-                                        <div class="text-xs font-bold text-slate-400 w-5">R${rIdx+1}</div>
-                                        <input type="text" value="${r.name}" oninput="updateData([${tIdx},'hps',${hpIdx},'rubrics',${rIdx},'name'], this.value)" class="input-field flex-1 text-sm bg-white" placeholder="Nama Kriteria">
-                                        <input type="text" value="${r.desc}" oninput="updateData([${tIdx},'hps',${hpIdx},'rubrics',${rIdx},'desc'], this.value)" class="input-field flex-[2] text-sm bg-white hidden md:block" placeholder="Penerangan">
-                                        <input type="number" value="${r.max}" oninput="updateData([${tIdx},'hps',${hpIdx},'rubrics',${rIdx},'max'], Number(this.value))" class="input-field w-16 text-center text-sm font-bold bg-white" placeholder="Max">
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-            <button onclick="addHP(${tIdx})" class="mt-4 text-xs font-bold text-indigo-600 hover:text-indigo-800"><i class="fas fa-plus-circle me-1"></i> Tambah HPP Baru</button>
-        </div>
-    `).join('');
-}
-
-async function saveSetup() {
-    const courseCode = document.getElementById('cfg_courseCode').value.trim();
-    const sheetLink = document.getElementById('cfg_sheetLink').value.trim();
-    if (!courseCode || !sheetLink) return showToast('Kod Kursus & Pautan Sheet Wajib Diisi!', 'warn');
-
-    const configPayload = {
-        COURSE_CODE: courseCode,
-        COURSE_NAME: document.getElementById('cfg_courseName').value.trim(),
-        DEPARTMENT: document.getElementById('cfg_dept').value.trim(),
-        ACADEMIC_SESSION: document.getElementById('cfg_session').value.trim(),
-        SHEET_LINK: sheetLink,
-        FOLDER_LINK: document.getElementById('cfg_folderLink').value.trim(),
-        TASKS: tasksData
+    // Bina konfigurasi payload
+    const payload = {
+        action: "saveMasterConfig",
+        config: {
+            COURSE_CODE: code,
+            COURSE_NAME: name,
+            DEPARTMENT: document.getElementById('wizDept').value,
+            ACADEMIC_SESSION: document.getElementById('wizSession').value,
+            SHEET_LINK: sheetUrl,
+            FOLDER_LINK: document.getElementById('wizFolderUrl').value,
+            TASKS: [] // Boleh diperkembang untuk struktur dinamik
+        }
     };
 
-    const btn = document.getElementById('btnSaveSetup');
-    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Menghantar Konfigurasi ke Server...';
-
     try {
-        const res = await fetch(API, {
-            method: 'POST', mode: 'no-cors',
-            body: JSON.stringify({ action: "saveMasterConfig", config: configPayload })
+        const response = await fetch(API, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify(payload)
         });
+        
+        // Memandangkan no-cors, kita tunggu sebentar dan andaikan berjaya
         await new Promise(r => setTimeout(r, 2000));
-        
-        showToast('Pangkalan Data Berjaya Diinisialisasi!', 'success');
-        
-        // Reload page to reflect dynamic changes on login screen
-        setTimeout(() => location.reload(), 1500);
-
-    } catch (e) {
-        showToast('Ralat sambungan API.', 'warn');
-        btn.disabled = false; btn.innerHTML = '<i class="fas fa-rocket me-2"></i> SIMPAN & INISIALISASI PANGKALAN DATA';
+        alert("Pangkalan data berjaya diinisialisasi! Sila muat semula (refresh) halaman untuk memasuki portal pemarkahan.");
+        window.location.reload();
+    } catch (err) {
+        showToast("Ralat penyimpanan pangkalan data.");
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-database me-2"></i> SIMPAN & INISIALISASI PANGKALAN DATA (APPS SCRIPT)';
     }
 }
 </script>
-
-<div class="bg-slate-200 text-slate-500 text-center py-4 text-[10px] mt-10">
-    Enjin Dinamik Master Portal &copy; 2026 Hak Cipta Terpelihara. Google Workspace Compliant.
-</div>
 
 </body>
 </html>
