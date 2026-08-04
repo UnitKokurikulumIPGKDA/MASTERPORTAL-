@@ -53,63 +53,40 @@
 </div>
 
 <!-- ========================================== -->
-<!-- 1. SETUP WIZARD (Hanya dipaparkan jika IS_INITIALIZED == false) -->
+<!-- 1. SETUP WIZARD (Hanya dipaparkan jika Pangkalan Data Kosong) -->
 <!-- ========================================== -->
 <div id="setupView" class="hidden min-h-screen p-8 bg-slate-50 flex items-center justify-center">
     <div class="academic-card max-w-3xl w-full p-10 border-t-4 border-indigo-600">
         <div class="text-center mb-8">
-            <h1 class="font-serif-title text-3xl font-bold text-slate-800 mb-2">Panel Konfigurasi Master Portal</h1>
-            <p class="text-slate-500 text-sm">Sila lengkapkan maklumat kursus dan bina struktur HPP untuk menjana pangkalan data Google Sheets secara automatik.</p>
+            <h1 class="font-serif-title text-3xl font-bold text-slate-800 mb-2">Konfigurasi Master Portal Baru</h1>
+            <p class="text-slate-500 text-sm">Pangkalan data ini didapati masih kosong. Sila rancang struktur kursus anda untuk penjanaan jadual automatik.</p>
         </div>
 
         <div class="grid grid-cols-2 gap-6 mb-6">
             <div>
                 <label class="dim-label">Kod Kursus</label>
-                <input type="text" id="cfgCode" class="w-full p-3 border rounded bg-slate-50" placeholder="Contoh: MPU3421">
+                <input type="text" id="cfgCode" class="w-full p-3 border rounded bg-slate-50 outline-none focus:border-indigo-500" placeholder="Contoh: BMMB1074">
             </div>
             <div>
                 <label class="dim-label">Nama Kursus</label>
-                <input type="text" id="cfgName" class="w-full p-3 border rounded bg-slate-50" placeholder="Contoh: PERMAINAN">
+                <input type="text" id="cfgName" class="w-full p-3 border rounded bg-slate-50 outline-none focus:border-indigo-500" placeholder="Contoh: Sejarah Sastera">
             </div>
-        </div>
-
-        <div class="mb-8">
-            <label class="dim-label">Pautan (URL) Google Sheets Induk</label>
-            <input type="text" id="cfgSheet" class="w-full p-3 border rounded bg-slate-50 font-mono-score text-xs" placeholder="https://docs.google.com/spreadsheets/d/...">
         </div>
 
         <div class="mb-8 p-6 border rounded-xl bg-slate-50">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-sm uppercase text-slate-700">Struktur Pemarkahan Dinamik (HPP)</h3>
+                <h3 class="font-bold text-sm uppercase text-slate-700">Struktur Pemarkahan HPP / Tugasan</h3>
                 <button onclick="addHPP()" class="text-xs bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded font-bold hover:bg-indigo-200">+ Tambah HPP</button>
             </div>
             <div id="hppList" class="space-y-3"></div>
         </div>
 
-        <button onclick="saveSetup()" id="btnSetup" class="btn-primary py-4"><i class="fas fa-magic me-2"></i> Jana & Inisialisasi Pangkalan Data</button>
+        <button onclick="saveSetup()" id="btnSetup" class="btn-primary py-4"><i class="fas fa-magic me-2"></i> Jana Pangkalan Data & Aktifkan Portal</button>
     </div>
 </div>
 
 <!-- ========================================== -->
-<!-- 2. LOGIN SCREEN (Dipaparkan jika IS_INITIALIZED == true) -->
-<!-- ========================================== -->
-<div id="loginView" class="hidden min-h-screen flex items-center justify-center">
-    <div class="academic-card w-full max-w-md p-10 border-t-4 border-blue-600 text-center shadow-xl">
-        <i class="fas fa-university text-5xl text-blue-600 mb-6"></i>
-        <h2 class="font-serif-title text-2xl font-bold text-slate-800 mb-2">Portal Pemarkahan</h2>
-        <div id="loginCourseName" class="text-sm font-bold text-blue-800 bg-blue-50 py-2 px-4 rounded-full inline-block mb-8">MEMUATKAN DATA KURSUS...</div>
-        
-        <div class="text-left mb-6">
-            <label class="dim-label">Kredensial Log Masuk</label>
-            <input type="email" id="loginEmail" class="w-full p-3 border rounded bg-slate-50 mb-4" placeholder="Emel Rasmi IPG">
-            <input type="password" id="loginPass" class="w-full p-3 border rounded bg-slate-50" placeholder="Kata Laluan">
-        </div>
-        <button onclick="doLogin()" id="btnLogin" class="btn-primary py-4"><i class="fas fa-sign-in-alt me-2"></i> Akses Sistem</button>
-    </div>
-</div>
-
-<!-- ========================================== -->
-<!-- 3. DASHBOARD OPERASI UTAMA -->
+<!-- 2. MAIN DASHBOARD OPERASI -->
 <!-- ========================================== -->
 <div id="dashboardView" class="hidden">
     <!-- HEADER -->
@@ -119,9 +96,8 @@
             <span id="dashHeaderTitle">PORTAL OPERASI | Kegunaan Rasmi IPGKDA</span>
         </div>
         <div class="flex items-center gap-4">
-            <span id="adminBadgeDash" class="hidden bg-yellow-400 text-yellow-900 px-2 py-1 rounded shadow"><i class="fas fa-crown me-1"></i> Super Admin</span>
-            <span id="lecNameDisplay" class="text-slate-300">Pemeriksa</span>
-            <button onclick="location.reload()" class="hover:text-red-400 border border-slate-700 px-3 py-1 rounded bg-slate-800"><i class="fas fa-power-off me-1"></i> Log Keluar</button>
+            <span class="bg-yellow-400 text-yellow-900 px-2 py-1 rounded shadow"><i class="fas fa-crown me-1"></i> Super Admin</span>
+            <button onclick="location.reload()" class="hover:text-yellow-400 border border-slate-700 px-3 py-1 rounded bg-slate-800"><i class="fas fa-sync-alt me-1"></i> Refresh</button>
         </div>
     </div>
 
@@ -131,8 +107,7 @@
             <button class="tab active" onclick="showTab('marking', this)"><i class="fas fa-calculator me-2"></i> Pemarkahan Induk</button>
             <button class="tab" onclick="showTab('summary', this)"><i class="fas fa-table me-2"></i> Buku Rekod</button>
             <button class="tab" onclick="showTab('laporan', this)"><i class="fas fa-chart-bar me-2"></i> Laporan Gred</button>
-            <button class="tab" id="tabMod" onclick="showTab('moderasi', this)"><i class="fas fa-balance-scale me-2 text-amber-600"></i> Moderasi LAM-PT-04</button>
-            <button class="tab" id="tabSim" onclick="showTab('simulasi', this)"><i class="fas fa-magic me-2 text-purple-600"></i> Simulasi SP</button>
+            <button class="tab" onclick="showTab('simulasi', this)"><i class="fas fa-magic me-2 text-purple-600"></i> Simulasi SP</button>
         </div>
 
         <div class="flex gap-6 items-start">
@@ -145,9 +120,9 @@
                 </div>
                 
                 <div class="flex flex-col gap-2 mb-4">
-                    <input type="text" id="searchBox" placeholder="Cari nama atau KP..." class="w-full text-xs p-2 bg-slate-50 border rounded outline-none" onkeyup="filterList()">
-                    <select id="permainanFilter" onchange="filterList()" class="w-full text-xs p-2 bg-blue-50 text-blue-800 font-bold border border-blue-200 rounded outline-none">
-                        <option value="">Semua Permainan</option>
+                    <input type="text" id="searchBox" placeholder="Cari nama atau KP..." class="w-full text-xs p-2 bg-slate-50 border rounded focus:border-blue-500 outline-none" onkeyup="filterList()">
+                    <select id="permainanFilter" onchange="filterList()" class="w-full text-xs p-2 bg-blue-50 text-blue-800 font-bold border border-blue-200 rounded outline-none hidden">
+                        <option value="">Semua Opsyen/Permainan</option>
                     </select>
                 </div>
                 <div id="studentList" class="scroll-thin flex-1" style="overflow-y:auto; padding-right:4px;"></div>
@@ -198,7 +173,7 @@
                             <label class="dim-label text-amber-800 flex items-center gap-2 mb-2"><i class="fas fa-exclamation-triangle"></i> Justifikasi Cemerlang Tertinggi (WAJIB UNTUK A+)</label>
                             <textarea id="justTxt" class="w-full border-amber-300 rounded p-3 text-sm outline-none" rows="2" placeholder="Rasional markah..."></textarea>
                         </div>
-                        <button id="saveBtn" onclick="saveDynamicScores()" class="btn-primary py-4"><i class="fas fa-save me-2 text-lg"></i> Simpan Markah Induk</button>
+                        <button id="saveBtn" onclick="saveDynamicScores()" class="btn-primary py-4"><i class="fas fa-save me-2 text-lg"></i> Simpan Markah Ke Pangkalan Data</button>
                     </div>
                 </div>
 
@@ -245,19 +220,6 @@
                     </div>
                 </div>
 
-                <!-- TAB: MODERASI -->
-                <div id="tab-moderasi" class="hidden">
-                    <div class="academic-card p-6 border-l-4 border-amber-600">
-                        <h3 class="font-serif-title text-xl font-bold text-slate-800 mb-6 border-b pb-4"><i class="fas fa-balance-scale text-amber-600 me-2"></i> Senarai Kes Ekstrem & Moderasi (LAM-PT-04)</h3>
-                        <div class="overflow-x-auto border rounded-xl">
-                            <table class="academic-table">
-                                <thead class="bg-slate-50"><tr><th>Kategori Kes</th><th>Nama Pelajar</th><th>Markah (100%)</th><th class="text-center">Gred</th></tr></thead>
-                                <tbody id="modBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- TAB: SIMULASI -->
                 <div id="tab-simulasi" class="hidden">
                     <div class="academic-card p-6 border-l-4 border-purple-600">
@@ -265,8 +227,8 @@
                         <p class="text-xs text-slate-500 mb-6 border-b pb-4">Menjana pelarasan markah selamat ke sempadan julat tanpa menukar gred asal.</p>
                         
                         <div class="flex gap-4 items-end mb-6 bg-slate-50 p-5 rounded-xl border">
-                            <div class="flex-1"><label class="dim-label">Sasaran SP Baru (≥)</label><input type="number" id="simTarget" value="5.0" step="0.1" class="w-full p-2 border rounded font-mono-score"></div>
-                            <div class="flex-1"><label class="dim-label">Had Perubahan Markah</label><input type="number" id="simMax" value="5.0" step="0.5" class="w-full p-2 border rounded font-mono-score"></div>
+                            <div class="flex-1"><label class="dim-label">Sasaran SP Baru (≥)</label><input type="number" id="simTarget" value="5.0" step="0.1" class="w-full p-2 border rounded font-mono-score outline-none focus:border-purple-500"></div>
+                            <div class="flex-1"><label class="dim-label">Had Perubahan Markah</label><input type="number" id="simMax" value="5.0" step="0.5" class="w-full p-2 border rounded font-mono-score outline-none focus:border-purple-500"></div>
                             <button onclick="runSimulation()" class="btn-primary w-auto px-6 py-3 bg-purple-600 hover:bg-purple-700">Jana Cadangan</button>
                         </div>
 
@@ -277,7 +239,7 @@
                             </div>
                             <div class="overflow-x-auto border rounded-xl mb-4">
                                 <table class="academic-table">
-                                    <thead class="bg-slate-50"><tr><th class="text-center">Pilih</th><th>Nama</th><th class="text-center">Gred Asal</th><th class="text-center">Lama</th><th class="text-center">Baru</th><th class="text-center">Beza</th></tr></thead>
+                                    <thead class="bg-slate-50"><tr><th class="text-center w-10">Pilih</th><th>Nama</th><th class="text-center">Gred Asal</th><th class="text-center">Lama</th><th class="text-center">Baru</th><th class="text-center">Beza</th></tr></thead>
                                     <tbody id="simBody"></tbody>
                                 </table>
                             </div>
@@ -293,24 +255,28 @@
 
 <script>
 // ==========================================
-// PENTING: LETAKKAN URL WEB APP ANDA DI SINI
+// TUKAR URL API ANDA SELEPAS DEPLOY CODE.GS
 // ==========================================
-const API = "LETAK_URL_ANDA_DI_SINI"; 
+const API = "LETAK_URL_WEB_APP_ANDA_DI_SINI"; 
 
 let masterConfig = null;
 let sData = [], curS = null, globalScoreHeaders = [];
-let isAdminUser = false, currentLecEmail = "";
 let simSuggestions = [];
-let configTasks = [];
 
 function showToast(msg) {
     const t = document.getElementById('toast');
-    t.innerHTML = `<i class="fas fa-info-circle me-2"></i> ${msg}`;
+    t.innerHTML = `<i class="fas fa-check-circle me-2"></i> ${msg}`;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3000);
 }
 
+// 1. SEMAK STATUS INSIALISASI
 window.onload = async () => {
+    if(API === "LETAK_URL_WEB_APP_ANDA_DI_SINI" || API === "") {
+        document.getElementById('globalLoader').innerHTML = `<div class="p-6 bg-red-100 text-red-800 rounded font-bold">Sila Letakkan URL Web App (API) Anda di dalam kod HTML ini dahulu.</div>`;
+        return;
+    }
+    
     try {
         const r = await fetch(API + "?action=getCourseConfig");
         const o = await r.json();
@@ -318,33 +284,33 @@ window.onload = async () => {
         document.getElementById('globalLoader').style.display = 'none';
 
         if (masterConfig && masterConfig.IS_INITIALIZED) {
-            document.getElementById('loginView').classList.remove('hidden');
-            document.getElementById('loginCourseName').textContent = `${masterConfig.COURSE_CODE} — ${masterConfig.COURSE_NAME}`;
             document.getElementById('dashHeaderTitle').textContent = `PORTAL OPERASI | ${masterConfig.COURSE_CODE} | ${masterConfig.COURSE_NAME}`;
+            document.getElementById('dashboardView').classList.remove('hidden');
+            loadData();
         } else {
             document.getElementById('setupView').classList.remove('hidden');
             addHPP(); // Default 1 row
         }
     } catch(e) {
-        document.getElementById('globalLoader').style.display = 'none';
-        alert("Gagal menyambung ke pangkalan data. Sila pastikan URL API betul.");
+        document.getElementById('globalLoader').innerHTML = `<div class="p-6 bg-red-100 text-red-800 rounded font-bold">Gagal berhubung dengan pelayan. Sila pastikan URL API tepat.</div>`;
     }
 }
 
+// 2. FUNGSI SETUP WIZARD
 function addHPP() {
     const list = document.getElementById('hppList');
     const id = Date.now();
     const html = `
-        <div class="flex gap-3 items-end bg-white p-3 border rounded shadow-sm" id="hpp_${id}">
-            <div class="flex-1"><label class="dim-label">Nama/Kod HPP</label><input type="text" class="hpp-code w-full p-2 border rounded text-xs" placeholder="HPP1"></div>
-            <div class="w-24"><label class="dim-label">Max Skor</label><input type="number" class="hpp-max w-full p-2 border rounded text-xs" value="20"></div>
-            <div class="flex-1"><label class="dim-label">Jenis Penilaian</label>
-                <select class="hpp-mode w-full p-2 border rounded text-xs">
+        <div class="flex gap-3 items-end bg-white p-4 border rounded-xl shadow-sm" id="hpp_${id}">
+            <div class="flex-1"><label class="dim-label">Kod HPP</label><input type="text" class="hpp-code w-full p-2 border rounded text-xs outline-none focus:border-indigo-500" placeholder="Contoh: HPP1"></div>
+            <div class="w-28"><label class="dim-label">Max Peratus</label><input type="number" class="hpp-max w-full p-2 border rounded text-xs outline-none focus:border-indigo-500" value="20"></div>
+            <div class="flex-1"><label class="dim-label">Sistem Penilaian</label>
+                <select class="hpp-mode w-full p-2 border rounded text-xs outline-none focus:border-indigo-500">
                     <option value="SINGLE">Penilai Tunggal</option>
                     <option value="DUAL_AVG">Dwi-Penilai (Purata)</option>
                 </select>
             </div>
-            <button onclick="document.getElementById('hpp_${id}').remove()" class="p-2 bg-red-50 text-red-600 rounded border border-red-200"><i class="fas fa-trash"></i></button>
+            <button onclick="document.getElementById('hpp_${id}').remove()" class="p-2 bg-red-50 text-red-600 rounded border border-red-200 hover:bg-red-100"><i class="fas fa-trash"></i></button>
         </div>`;
     list.insertAdjacentHTML('beforeend', html);
 }
@@ -352,9 +318,7 @@ function addHPP() {
 async function saveSetup() {
     const code = document.getElementById('cfgCode').value;
     const name = document.getElementById('cfgName').value;
-    const sheet = document.getElementById('cfgSheet').value;
-    
-    if(!code || !name || !sheet) return showToast("Sila lengkapkan semua ruangan wajib.");
+    if(!code || !name) return showToast("Sila lengkapkan kod dan nama kursus.");
     
     const tasks = [];
     document.querySelectorAll('.hpp-code').forEach((el, i) => {
@@ -367,70 +331,17 @@ async function saveSetup() {
     });
 
     const btn = document.getElementById('btnSetup');
-    btn.innerHTML = "Memproses..."; btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border animate-spin inline-block w-4 h-4 border-2 rounded-full mr-2"></span>Menjana Pangkalan Data...'; 
+    btn.disabled = true;
 
     try {
-        const payload = { COURSE_CODE: code, COURSE_NAME: name, SHEET_LINK: sheet, TASKS: tasks };
-        const r = await fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'saveMasterConfig', config: payload }) });
-        setTimeout(() => { location.reload(); }, 2000);
+        const payload = { COURSE_CODE: code, COURSE_NAME: name, TASKS: tasks };
+        await fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'saveMasterConfig', config: payload }) });
+        setTimeout(() => { location.reload(); }, 2500); // Tunggu database bina table, kemudian reload
     } catch(e) { showToast("Ralat!"); btn.innerHTML = "Cuba Semula"; btn.disabled = false; }
 }
 
-async function doLogin() {
-    const email = document.getElementById('loginEmail').value;
-    const pass = document.getElementById('loginPass').value;
-    if(!email) return;
-
-    const btn = document.getElementById('btnLogin');
-    btn.innerHTML = "Mengesahkan..."; btn.disabled = true;
-
-    try {
-        const r = await fetch(`${API}?action=lecturerLogin&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}`);
-        const o = await r.json();
-        
-        if (o.status === "success") {
-            currentLecEmail = email;
-            isAdminUser = o.isAdmin;
-            document.getElementById('lecNameDisplay').textContent = o.name;
-            if(isAdminUser) {
-                document.getElementById('adminBadgeDash').classList.remove('hidden');
-                document.getElementById('tabMod').classList.remove('hidden');
-                document.getElementById('tabSim').classList.remove('hidden');
-            } else {
-                document.getElementById('tabMod').classList.add('hidden');
-                document.getElementById('tabSim').classList.add('hidden');
-            }
-            
-            document.getElementById('loginView').classList.add('hidden');
-            document.getElementById('dashboardView').classList.remove('hidden');
-            
-            loadStudentData();
-        } else {
-            showToast(o.message);
-            btn.innerHTML = "Cuba Semula"; btn.disabled = false;
-        }
-    } catch(e) { showToast("Ralat pelayan"); btn.innerHTML = "Cuba Semula"; btn.disabled = false; }
-}
-
-async function loadStudentData() {
-    try {
-        const r = await fetch(`${API}?action=getLecturerStudents&email=${encodeURIComponent(currentLecEmail)}`);
-        const o = await r.json();
-        sData = o.data || [];
-        globalScoreHeaders = o.scoreHeaders || [];
-        
-        document.getElementById('classInfo').textContent = sData.length + " Calon";
-        
-        const permainanSet = new Set();
-        sData.forEach(s => { if(s.Permainan) permainanSet.add(s.Permainan); });
-        const filterEl = document.getElementById('permainanFilter');
-        filterEl.innerHTML = '<option value="">Semua Permainan</option>' + Array.from(permainanSet).sort().map(p => `<option value="${p}">${p}</option>`).join('');
-        
-        filterList();
-        renderSummaryTable();
-    } catch(e) {}
-}
-
+// 3. FUNGSI OPERASI DASHBOARD (Sama seperti MPU3421)
 function showTab(id, btnEl) {
     document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
     document.getElementById('tab-' + id).classList.remove('hidden');
@@ -439,7 +350,29 @@ function showTab(id, btnEl) {
 
     if(id === 'summary') renderSummaryTable();
     if(id === 'laporan') loadGradeSummary();
-    if(id === 'moderasi') loadModerasi();
+}
+
+async function loadData() {
+    try {
+        const r = await fetch(API + "?action=getLecturerStudents&email=admin");
+        const o = await r.json();
+        
+        sData = o.data || [];
+        globalScoreHeaders = o.scoreHeaders || [];
+        document.getElementById('classInfo').textContent = sData.length + " Calon";
+        
+        const permainanSet = new Set();
+        sData.forEach(s => { if(s.Permainan) permainanSet.add(s.Permainan); });
+        
+        const filterEl = document.getElementById('permainanFilter');
+        if(permainanSet.size > 0) {
+            filterEl.classList.remove('hidden');
+            filterEl.innerHTML = '<option value="">Semua Opsyen/Permainan</option>' + Array.from(permainanSet).sort().map(p => `<option value="${p}">${p}</option>`).join('');
+        }
+        
+        filterList();
+        renderSummaryTable();
+    } catch(e) { showToast("Gagal menarik data pelajar."); }
 }
 
 function filterList() {
@@ -463,7 +396,7 @@ function filterList() {
                 </div>
             </div>
         </div>`;
-    }).join('') || `<div class="p-4 text-center text-xs text-slate-400">Tiada padanan.</div>`;
+    }).join('') || `<div class="p-4 text-center text-xs text-slate-400 border-dashed border-2 rounded">Tiada padanan.</div>`;
 }
 
 function calculateGred(m) {
@@ -516,10 +449,10 @@ function renderDynamicInputs(marks) {
         const max = maxMatch ? maxMatch[1] : 100;
         const label = base.replace(/_[0-9.]+$/, '').replace(/_/g, ' ');
 
-        html += `<div class="academic-card p-5 mb-4 border-l-4 border-blue-500 bg-slate-50">
-            <div class="flex justify-between items-center mb-3">
-                <span class="font-bold text-slate-700 uppercase tracking-widest text-[11px]">${label}</span>
-                <span class="bg-blue-100 text-blue-800 text-[9px] px-2 py-0.5 rounded font-bold border border-blue-200">MAX: ${max}%</span>
+        html += `<div class="academic-card p-6 mb-5 border-l-4 border-blue-500 shadow-sm">
+            <div class="flex justify-between items-center mb-5 border-b pb-3">
+                <span class="font-bold text-slate-700 uppercase tracking-widest text-[13px]"><i class="fas fa-file-alt text-blue-500 me-2"></i>${label}</span>
+                <span class="bg-blue-50 text-blue-700 text-[10px] px-3 py-1 rounded-md font-black border border-blue-200">MAX: ${max}%</span>
             </div>`;
 
         if (info.type === 'dual') {
@@ -527,17 +460,29 @@ function renderDynamicInputs(marks) {
             const v2 = marks && marks[info.p2Col] !== undefined ? marks[info.p2Col] : '';
             const vp = marks && marks[info.purataCol] !== undefined ? marks[info.purataCol] : '0.0';
 
-            html += `<div class="grid grid-cols-2 gap-4 mb-3">
-                <div><label class="dim-label">Penilai 1</label><input type="number" id="in_${info.p1Col}" value="${v1}" max="${max}" class="w-full text-center font-mono-score font-bold p-2 border rounded focus:border-indigo-500 outline-none" oninput="calcDyn()"></div>
-                <div><label class="dim-label">Penilai 2</label><input type="number" id="in_${info.p2Col}" value="${v2}" max="${max}" class="w-full text-center font-mono-score font-bold p-2 border rounded focus:border-emerald-500 outline-none" oninput="calcDyn()"></div>
+            html += `<div class="grid grid-cols-2 gap-6 mb-5">
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <label class="dim-label text-indigo-600 mb-2">Markah Penilai 1</label>
+                    <input type="number" id="in_${info.p1Col}" value="${v1}" max="${max}" class="w-full text-center font-mono-score font-bold text-xl border-slate-300 p-3 rounded focus:border-indigo-500 outline-none shadow-inner" oninput="calcDyn()">
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <label class="dim-label text-emerald-600 mb-2">Markah Penilai 2</label>
+                    <input type="number" id="in_${info.p2Col}" value="${v2}" max="${max}" class="w-full text-center font-mono-score font-bold text-xl border-slate-300 p-3 rounded focus:border-emerald-500 outline-none shadow-inner" oninput="calcDyn()">
+                </div>
             </div>
-            <div class="bg-blue-100 p-3 rounded-lg text-center flex items-center justify-between px-4">
-                <span class="text-[10px] font-bold text-blue-800 uppercase">Purata Diselaraskan</span>
-                <span class="font-mono-score text-[20px] font-black text-blue-700" id="lbl_${info.purataCol}">${Number(vp).toFixed(1)}</span>
+            <div class="bg-blue-50 p-4 rounded-xl text-center border border-blue-200 shadow-inner flex items-center justify-between px-6">
+                <span class="text-[11px] font-extrabold text-blue-800 uppercase tracking-wide"><i class="fas fa-equals me-2 opacity-50"></i>Purata Diselaraskan</span>
+                <div class="flex items-end gap-1">
+                    <span class="font-mono-score text-[32px] leading-none font-black text-blue-700" id="lbl_${info.purataCol}">${Number(vp).toFixed(1)}</span>
+                    <span class="font-bold text-blue-400 mb-1">/ ${max}</span>
+                </div>
             </div>`;
         } else {
             const v = marks && marks[info.col] !== undefined ? marks[info.col] : '';
-            html += `<div><label class="dim-label">Markah Diperoleh</label><input type="number" id="in_${info.col}" value="${v}" max="${max}" class="w-full text-center font-mono-score font-bold text-xl p-3 border rounded focus:border-blue-500 outline-none" oninput="calcDyn()"></div>`;
+            html += `<div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <label class="dim-label text-slate-600 mb-2">Markah Diperoleh (Penilai Tunggal)</label>
+                <input type="number" id="in_${info.col}" value="${v}" max="${max}" class="w-full text-center font-mono-score font-bold text-2xl border-slate-300 p-4 rounded focus:border-blue-500 outline-none shadow-inner" oninput="calcDyn()">
+            </div>`;
         }
         html += `</div>`;
     }
@@ -589,7 +534,8 @@ function calcDyn() {
 
 async function saveDynamicScores() {
     const btn = document.getElementById('saveBtn');
-    btn.innerHTML = 'Menyimpan...'; btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border animate-spin inline-block w-4 h-4 border-2 rounded-full mr-2"></span>Menyimpan...'; 
+    btn.disabled = true;
     
     const scores = {};
     let total = 0;
@@ -623,14 +569,16 @@ async function saveDynamicScores() {
     try {
         await fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
             action: 'submitScores', noKP: curS.No_KP,
-            scores: scores, total: Number(total.toFixed(1)), penilai: currentLecEmail,
+            scores: scores, total: Number(total.toFixed(1)),
             gred: calculateGred(total), justifikasi: document.getElementById('justTxt').value
         })});
         setTimeout(() => { 
-            showToast("Berjaya Disimpan!"); loadStudentData(); 
-            btn.innerHTML = "<i class='fas fa-save me-2'></i> Simpan Markah Induk"; btn.disabled = false; 
-        }, 1500);
-    } catch(e) { showToast("Ralat!"); btn.disabled = false; }
+            showToast("Markah Dinamik Disimpan!"); 
+            loadData(); 
+            btn.innerHTML = "<i class='fas fa-save text-lg'></i> SIMPAN MARKAH KE PANGKALAN DATA"; 
+            btn.disabled = false; 
+        }, 1000);
+    } catch(e) { alert("Ralat Server!"); btn.disabled = false; }
 }
 
 function renderSummaryTable() {
@@ -656,25 +604,15 @@ function renderSummaryTable() {
         const badgeCol = gred.includes('A') ? 'bg-green-100 text-green-800' : 'bg-slate-100';
         rowHtml += `<td class="text-center font-mono-score font-black text-indigo-700 bg-slate-50 border-l">${m.total?Number(m.total).toFixed(1):'-'}</td><td class="text-center bg-slate-50"><span class="px-2 py-1 rounded font-bold text-[10px] ${badgeCol}">${gred}</span></td></tr>`;
         return rowHtml;
-    }).join('') || `<tr><td colspan="10" class="text-center p-8 text-slate-400">Tiada rekod.</td></tr>`;
+    }).join('') || `<tr><td colspan="10" class="text-center p-8 text-slate-400">Tiada rekod pelajar untuk dipaparkan.</td></tr>`;
 }
 
 async function loadGradeSummary() {
     try {
-        const r = await fetch(`${API}?action=getGradeSummary&email=${encodeURIComponent(currentLecEmail)}`); const o = await r.json();
+        const r = await fetch(API + "?action=getGradeSummary"); const o = await r.json();
         document.getElementById('gradeBody').innerHTML = o.bands.map(b => `<tr><td class="font-bold text-center border-r text-indigo-800">${b.gred}</td><td class="text-center font-mono-score font-bold text-lg">${b.jumlah}</td><td class="text-center font-mono-score text-slate-500">${b.peratus}%</td></tr>`).join('');
-        document.getElementById('statMin').textContent = o.purata; document.getElementById('statSD').textContent = o.sisihanPiawai;
-    } catch(e){}
-}
-
-async function loadModerasi() {
-    try {
-        const r = await fetch(`${API}?action=getModerationSampling&email=${encodeURIComponent(currentLecEmail)}`); const o = await r.json();
-        const ex = o.extremesHigh.concat(o.extremesLow);
-        document.getElementById('modBody').innerHTML = ex.map(s => {
-            const badge = s.markah >= 90 ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-red-100 text-red-800 border-red-300';
-            return `<tr class="hover:bg-slate-50"><td><span class="px-2 py-1 text-[10px] font-bold border rounded ${badge}">${s.markah>=90?'Cemerlang Tertinggi (A+)':'Gagal (<50)'}</span></td><td><div class="font-bold text-xs">${s.nama}</div><div class="text-[9px] font-mono-score text-slate-400 mt-1">${s.kp} | ${s.kelas}</div></td><td class="font-mono-score font-black text-lg text-slate-700">${s.markah}</td><td class="text-center font-serif-title font-bold text-xl">${s.gred}</td></tr>`;
-        }).join('') || `<tr><td colspan="4" class="text-center p-8 text-slate-400 border-dashed border-2 m-4 bg-slate-50 rounded">Tiada kes ekstrem dikesan. Pemarkahan adalah normal.</td></tr>`;
+        document.getElementById('statMin').textContent = o.purata;
+        document.getElementById('statSD').textContent = o.sisihanPiawai;
     } catch(e){}
 }
 
@@ -687,7 +625,8 @@ function runSimulation() {
     
     const calcSD = (scores) => {
         const vals = Object.values(scores); const n = vals.length; if(n===0) return {sd:0,mean:0};
-        const mean = vals.reduce((a,b)=>a+b,0)/n; const variance = vals.reduce((a,b)=>a+Math.pow(b-mean,2),0)/n;
+        const mean = vals.reduce((a,b)=>a+b,0)/n;
+        const variance = vals.reduce((a,b)=>a+Math.pow(b-mean,2),0)/n;
         return {sd:Math.sqrt(variance), mean};
     };
 
@@ -708,7 +647,8 @@ function runSimulation() {
         let bestTarget = orig; let bestSD = baseSD;
         [t1, t2].forEach(t => {
             if (Math.abs(t - orig) <= maxDelta && calculateGred(t) === gred) {
-                const temp = {...workingScores, [kp]: t}; const nSD = calcSD(temp).sd;
+                const temp = {...workingScores, [kp]: t};
+                const nSD = calcSD(temp).sd;
                 if(nSD > bestSD) { bestSD = nSD; bestTarget = t; }
             }
         });
@@ -722,18 +662,28 @@ function runSimulation() {
 
     document.getElementById('simSpNew').textContent = baseSD.toFixed(4);
     document.getElementById('simResults').classList.remove('hidden');
-    document.getElementById('simBody').innerHTML = simSuggestions.map((s,i) => `<tr><td class="text-center"><input type="checkbox" class="sim-check w-4 h-4 text-purple-600 rounded" data-idx="${i}" checked></td><td class="font-bold text-[11px]">${s.nama}</td><td class="text-center font-bold"><span class="bg-slate-100 border px-2 py-0.5 rounded text-[10px]">${s.gred}</span></td><td class="text-center font-mono-score text-slate-500">${s.old.toFixed(1)}</td><td class="text-center font-mono-score font-black text-purple-700 text-lg">${s.new.toFixed(1)}</td><td class="text-center font-mono-score font-bold ${s.delta>0?'text-green-600':'text-red-600'}">${s.delta>0?'+':''}${s.delta.toFixed(1)}</td></tr>`).join('') || `<tr><td colspan="6" class="text-center p-8 text-slate-400 border-dashed m-2">Tiada penyesuaian dijumpai.</td></tr>`;
+    document.getElementById('simBody').innerHTML = simSuggestions.map((s,i) => `<tr><td class="text-center"><input type="checkbox" class="sim-check w-4 h-4 text-purple-600 rounded" data-idx="${i}" checked></td><td class="font-bold text-[11px]">${s.nama}</td><td class="text-center font-bold"><span class="bg-slate-100 border px-2 py-0.5 rounded text-[10px]">${s.gred}</span></td><td class="text-center font-mono-score text-slate-500">${s.old.toFixed(1)}</td><td class="text-center font-mono-score font-black text-purple-700 text-lg">${s.new.toFixed(1)}</td><td class="text-center font-mono-score font-bold ${s.delta>0?'text-green-600':'text-red-600'}">${s.delta>0?'+':''}${s.delta.toFixed(1)}</td></tr>`).join('') || `<tr><td colspan="6" class="text-center p-8 text-slate-400 border-dashed border-2 m-2">Tiada perubahan diperlukan atau dijumpai mengikut had kriteria yang ditetapkan.</td></tr>`;
 }
 
 async function applySim() {
     const checks = document.querySelectorAll('.sim-check:checked');
-    if(!checks.length) return;
-    const payload = []; checks.forEach(c => { const s = simSuggestions[c.dataset.idx]; payload.push({noKP: s.kp, newTotal: s.new}); });
+    if(!checks.length) return showToast("Sila tanda kotak sekurang-kurangnya satu cadangan.");
+    const payload = [];
+    checks.forEach(c => { const s = simSuggestions[c.dataset.idx]; payload.push({noKP: s.kp, newTotal: s.new}); });
     
-    const btn = document.getElementById('simBtn'); btn.innerHTML = 'Menerapkan...'; btn.disabled = true;
+    const btn = document.getElementById('simBtn');
+    btn.innerHTML = '<span class="spinner-border animate-spin inline-block w-4 h-4 border-2 rounded-full mr-2"></span>Menerapkan Perubahan...'; 
+    btn.disabled = true;
+
     try {
         await fetch(API, {method:'POST', mode:'no-cors', body:JSON.stringify({action:'applySimulationChanges', changes:payload})});
-        setTimeout(() => { showToast("Selesai!"); loadStudentData(); document.getElementById('simResults').classList.add('hidden'); btn.innerHTML = "Terapkan Ke Pangkalan Data"; btn.disabled = false;}, 1500);
+        setTimeout(() => { 
+            showToast("Simulasi SP Diterapkan!"); 
+            loadData(); 
+            document.getElementById('simResults').classList.add('hidden'); 
+            btn.innerHTML = "<i class='fas fa-check-double me-2'></i> Terapkan Perubahan Terpilih Ke Pangkalan Data"; 
+            btn.disabled = false;
+        }, 1500);
     } catch(e) { btn.disabled = false; }
 }
 </script>
